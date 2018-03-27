@@ -1,3 +1,78 @@
-<p>
-  db-trips works!
-</p>
+<div>
+  <div class="row">
+    <div class="col-md-10">
+      <div class="row">
+        <div class="col col-md-4">
+          <div class="element">
+            <div class="card border-secondary mb-3">
+              <div class="card-body">
+                <h4 class="card-title">BIKE</h4>
+                <google-chart [data]="dayChartBike" *ngIf="dayChartBike"></google-chart>
+              </div>
+            </div>
+          </div>
+          <div class="element">
+            <div class="card border-secondary mb-3">
+              <div class="card-body">
+                <h4 class="card-title">WALK</h4>
+                <google-chart [data]="dayChartWalk" *ngIf="dayChartWalk"></google-chart>
+              </div>
+            </div>
+          </div>
+          <div class="element">
+            <div class="card border-secondary mb-3">
+              <div class="card-body">
+                <h4 class="card-title">TP</h4>
+                <google-chart [data]="dayChartTP" *ngIf="dayChartTP"></google-chart>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col col-md-8">
+            <aol-map [width]="'100%'" [height]="'450'">
+                <aol-interaction-default></aol-interaction-default>
+                <aol-control-defaults></aol-control-defaults>
+                <aol-view [zoom]="11">
+                    <aol-coordinate [x]="11.123251" [y]="46.044685" [srid]="'EPSG:4326'"></aol-coordinate>
+                </aol-view>
+                <aol-layer-tile>
+                    <aol-source-osm></aol-source-osm>
+                </aol-layer-tile>
+                <aol-layer-image>
+                  <aol-source-imagewms 
+                    [url]="wmsURL" 
+                    [params]="wmsParams" *ngIf="wmsParams">
+                  </aol-source-imagewms>
+                </aol-layer-image>
+            </aol-map>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col col-md-4">
+          <div class="element">
+            <div class="card border-secondary mb-3">
+              <div class="card-body">
+                  <b>Ultima Settimana</b>
+                  <google-chart [data]="weekChart"></google-chart>
+              </div>
+            </div>
+          </div>          
+        </div>
+        <div class="col col-md-8">
+          <div class="element">
+            <div class="card border-secondary mb-3">
+              <div class="card-body">
+                <b>Ultimo Mese</b>
+                <google-chart [data]="monthChart"></google-chart>
+              </div>
+            </div>
+          </div>              
+        </div>
+      </div>    
+    </div>
+    <div class="col col-md-2">
+      <span class="fa player" [class.fa-play-circle]="!playing" [class.fa-pause-circle]="playing" (click)="playPause()"></span>
+      <nouislider [min]="minDate" [max]="maxDate" [(ngModel)]="currentTime" [config]="config" (change)="onChange($event)"></nouislider>
+    </div>
+  </div>
+</div>  

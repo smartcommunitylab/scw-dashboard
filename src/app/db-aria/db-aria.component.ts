@@ -97,6 +97,17 @@ export class DbAriaComponent implements OnInit {
     private http: HttpClient,
   ) { }
 
+  stationSelected(station: any) {
+    console.log('clicked', station);
+    if (station.id !== this.currentStation) {
+      if (this.playing) {
+        this.playPause();
+      }
+      this.currentStation = station.id;
+      this.updateData();
+    }
+  }
+
   private updateData(event?: number) {
     if (event) { this.currentTime = event; }
     const now = moment(this.currentTime);
@@ -202,6 +213,10 @@ export class DbAriaComponent implements OnInit {
     const day = this.dayData.filter((e) => e.name === attr).map((e) => [e.resulttime, parseFloat(e.value)]);
     table = table.concat(day);
     let newChart = null;
+    if (table.length <= 1) {
+      return newChart;
+    }
+
     if (chart) {
       newChart = Object.create(chart);
       newChart.dataTable = table;
