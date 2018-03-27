@@ -30,7 +30,9 @@ export class DbAriaComponent implements OnInit {
   dayData = [];
   monthChart: any;
   weekChart: any;
-  dayCharts = {};
+  dayChartPM10: any;
+  dayChartPM25: any;
+  dayChartSO2: any;
   playing = false;
 
   stations: any[];
@@ -113,9 +115,9 @@ export class DbAriaComponent implements OnInit {
     this.http.get(`${API}/Day/${this.currentStation}?fromTime=${day}&toTime=${to}`)
     .subscribe((data) => {
       this.dayData = (data as any).Entries.Entry;
-      this.updateDayChart('PM10');
-      this.updateDayChart('PM2.5');
-      this.updateDayChart('SO2');
+      this.dayChartPM10 = this.updateChart(this.dayChartPM10, 'PM10');
+      this.dayChartPM25 = this.updateChart(this.dayChartPM25, 'PM2.5');
+      this.dayChartSO2 = this.updateChart(this.dayChartSO2, 'SO2');
     });
     // aggregate data for last day
     this.http.get(`${API}/AggData?fromTime=${day}&toTime=${to}`)
@@ -195,19 +197,21 @@ export class DbAriaComponent implements OnInit {
     }
   }
 
-  private updateDayChart(attr: string) {
+  private updateChart(chart: any, attr: string) {
     let table = [['Day', attr]];
     const day = this.dayData.filter((e) => e.name === attr).map((e) => [e.resulttime, parseFloat(e.value)]);
     table = table.concat(day);
-    if (this.dayCharts[attr]) {
-      this.dayCharts[attr] = Object.create(this.dayCharts);
-      this.dayCharts[attr].dataTable = table;
+    let newChart = null;
+    if (chart) {
+      newChart = Object.create(chart);
+      newChart.dataTable = table;
     } else {
-      this.dayCharts[attr] = {
+      newChart = {
         chartType: 'LineChart',
         dataTable: table,
         options: {legend: 'none', height: 90, chartArea: {left: 0, top: 0, width: '100%', height: 80}, hAxis: {textPosition: 'none'}}
       };
     }
+    return newChart;
   }
 }

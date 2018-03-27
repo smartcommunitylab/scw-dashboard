@@ -7,7 +7,7 @@
             <div class="card border-secondary mb-3">
               <div class="card-body">
                 <h4 class="card-title">PM10</h4>
-                <google-chart [data]="dayCharts['PM10']" *ngIf="dayCharts['PM10']"></google-chart>
+                <google-chart [data]="dayChartPM10" *ngIf="dayChartPM10"></google-chart>
               </div>
             </div>
           </div>
@@ -15,7 +15,7 @@
             <div class="card border-secondary mb-3">
               <div class="card-body">
                 <h4 class="card-title">PM2.5</h4>
-                <google-chart [data]="dayCharts['PM2.5']" *ngIf="dayCharts['PM2.5']"></google-chart>
+                <google-chart [data]="dayChartPM25" *ngIf="dayChartPM25"></google-chart>
               </div>
             </div>
           </div>
@@ -23,7 +23,7 @@
             <div class="card border-secondary mb-3">
               <div class="card-body">
                 <h4 class="card-title">SO2</h4>
-                <google-chart [data]="dayCharts['SO2']" *ngIf="dayCharts['SO2']"></google-chart>
+                <google-chart [data]="dayChartSO2" *ngIf="dayChartSO2"></google-chart>
               </div>
             </div>
           </div>
