@@ -1,0 +1,12 @@
+.navbar-brand img {
+    max-height: 50px;
+}
+.navbar {
+    padding: .4rem !important;
+}
+.nav-link {
+    text-transform: uppercase;
+    font-size: 1.25rem;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+}

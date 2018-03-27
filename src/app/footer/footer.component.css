@@ -1,0 +1,6 @@
+img {
+    max-height: 50px;
+}
+.row {
+    width: calc(100% + 30px);
+}

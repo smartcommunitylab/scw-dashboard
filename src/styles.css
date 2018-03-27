@@ -1,0 +1,70 @@
+/* You can add global styles to this file, and also import other style files */
+@import "~bootswatch/dist/materia/bootstrap.min.css";
+@import "~font-awesome/css/font-awesome.css";
+@import "~nouislider/distribute/nouislider.min.css";
+
+body {
+    padding-top: 5.5rem;
+    padding-bottom: 92px;
+  }
+.starter-template {
+    padding: 3rem 1.5rem;
+    text-align: center;
+}
+nouislider, .noUi-vertical {
+  height: 95%;
+}
+
+.player {
+  font-size: 24px;
+}
+
+.card-body {
+  padding: 12px;
+}
+
+.card-title {
+  font-size: 13px;
+  margin-bottom: 0;
+  font-weight: bold;
+}
+
+.station {
+  opacity: .8;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  line-height: 50px;
+}
+.station.selected {
+  width: 120px !important;
+  height: 120px  !important;
+  border: 2px solid #ddd;
+  z-index: 100;
+  line-height: 1.2;
+  padding: 25px 20px;
+  text-align: left;
+}
+.station.selected div {
+  line-height: 1.2;
+  white-space: nowrap;
+  font-size: 12px;
+  height: 70px;
+  margin: auto;
+}
+
+.station.level1 {
+  background-color: #7BBB6D;
+}
+.station.level2 {
+  background-color: #BBCE55;
+}
+.station.level3 {
+  background-color: #EDC12F;
+}
+.station.level4 {
+  background-color: #F09227;
+}
+.station.level5 {
+  background-color: #E64470;
+}
