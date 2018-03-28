@@ -4,7 +4,7 @@ import * as moment from 'moment';
 import { TimeFormatter } from '../db-aria/db-aria.component';
 import { HttpClient } from '@angular/common/http';
 
-const API = 'https://scw.smartcommunitylab.it/es';
+const API = 'https://scw.smartcommunitylab.it/es/gamification-stats-59a91478e4b0c9db6800afaf-*/_search';
 const TYPES = ['Bike', 'Walk', 'PT'];
 
 @Component({
@@ -32,8 +32,8 @@ export class DbTripsComponent implements OnInit {
   dayChartTP: any;
   playing = false;
 
-  cities: any[];
-  cityData = {};
+  dayAggData = {};
+  dayHistData = {};
 
   /*****
    * START TIMER RELATED OPERATIONS
@@ -96,12 +96,24 @@ export class DbTripsComponent implements OnInit {
     const month = moment(now).subtract(30, 'days').format('YYYY-MM-DD HH:mm');
     const day = moment(now).subtract(1, 'days').format('YYYY-MM-DD HH:mm');
     const to = now.format('YYYY-MM-DD HH:mm');
+    // update Map data
     const old = this.wmsParams;
     this.wmsParams = null;
     setTimeout (() => {
       this.wmsParams = old;
       this.wmsParams['TIME'] = now.toDate().toISOString();
     });
+
+    // tslint:disable-next-line:max-line-length
+    this.getDayAgg('Walk', this.currentTime);
+    this.getDayAgg('Bike', this.currentTime);
+    this.getDayAgg('PT', this.currentTime);
+    this.getHist('Walk', 'day', moment(month).toDate().getTime(), this.currentTime);
+    this.getHist('Bike', 'day', moment(month).toDate().getTime(), this.currentTime);
+    this.getHist('PT', 'hour', moment(month).toDate().getTime(), this.currentTime);
+    this.getHist('Walk', 'hour', moment(day).toDate().getTime(), this.currentTime);
+    this.getHist('Bike', 'hour', moment(day).toDate().getTime(), this.currentTime);
+    this.getHist('PT', 'hour', moment(day).toDate().getTime(), this.currentTime);
     // last month for current station (week and month view)
     // this.http.get(`${API}/PeriodData/${this.currentStation}?fromTime=${month}&toTime=${to}`)
     // .subscribe((data) => {
@@ -134,22 +146,42 @@ export class DbTripsComponent implements OnInit {
     // });
   }
 
-  computeCaqi(data: any): number {
-    let NO2 = parseFloat(data.NO2) || 0;
-    let O3 = parseFloat(data.O3) || 0;
-    let PM10 = parseFloat(data.PM10) || 0;
-    let PM25 = parseFloat(data['PM2.5']) || 0;
-    NO2 = NO2 < 50 ? 1 : NO2 < 100 ? 2 : NO2 < 200 ? 3 : NO2 < 400 ? 4 : 5;
-    O3 = O3 < 60 ? 1 : O3 < 120 ? 2 : O3 < 180 ? 3 : O3 < 240 ? 4 : 5;
-    PM10 = PM10 < 25 ? 1 : PM10 < 50 ? 2 : PM10 < 90 ? 3 : PM10 < 180 ? 4 : 5;
-    PM25 = PM25 < 15 ? 1 : PM25 < 30 ? 2 : PM25 < 55 ? 3 : PM25 < 110 ? 4 : 5;
-    return Math.max(NO2, O3, PM10, PM25);
+  getDayAgg(type: string, date: number) {
+    const from = date - 1000 * 60 * 60 * 24;
+    let daySumQuery = null;
+    if (type !== 'PT') {
+      // tslint:disable-next-line:max-line-length
+      daySumQuery = {query: {bool: {must : [ {match : {eventType : 'PointConcept'}}, {match : {conceptName : type + '_Trips'}}, { range : { executionTime : {from : from, to : date}}}]}},
+      aggs : {total : { sum : { field : 'deltaScore' } }}};
+    } else {
+      // tslint:disable-next-line:max-line-length
+      daySumQuery = {query: {bool: {must : [ {match : {eventType : 'PointConcept'}}, { bool : {should : [{ match : {conceptName : 'Bus_Trips'} }, { match : {conceptName : 'Train_Trips'} } ] } }, { range : { executionTime : {from : from, to : date}}}]}},
+      aggs : {total : { sum : { field : 'deltaScore' } }}};
+    }
+    this.http.post(API, daySumQuery).subscribe((res: any) => {
+      this.dayAggData[type] = res.aggregations.total;
+    });
   }
 
-  private updatecities() {
-    const start = moment(this.currentTime).format('YYYY-MM-DD');
-    const day = this.monthData.filter((e) => e.resdate >= start);
+  getHist(type: string, agg: string, from: number, to: number) {
+    let daySumQuery = null;
+    if (type !== 'PT') {
+      // tslint:disable-next-line:max-line-length
+      daySumQuery = {size: 0, query: {bool: {must : [ {match : {eventType : 'PointConcept'}}, {match : {conceptName : type + '_Trips'}}, { range : { executionTime : {from : from, to : to}}}]}},
+      aggs : {trips_per_hours : { date_histogram : {field : 'executionTime', interval : agg },
+      aggs: {trips: {sum: {field: 'deltaScore'}}, cumulative_trips: { cumulative_sum: { buckets_path: 'trips' }}}}}};
+    } else {
+      // tslint:disable-next-line:max-line-length
+      daySumQuery = {size: 0, query: {bool: {must : [ {match : {eventType : 'PointConcept'}}, { bool : {should : [{ match : {conceptName : 'Bus_Trips'} }, { match : {conceptName : 'Train_Trips'} } ] } }, { range : { executionTime : {from : from, to : to}}}]}},
+      aggs : {trips_per_hours : { date_histogram : {field : 'executionTime', interval : agg },
+      aggs: {trips: {sum: {field: 'deltaScore'}}, cumulative_trips: { cumulative_sum: { buckets_path: 'trips' }}}}}};
+    }
+    this.http.post(API, daySumQuery).subscribe((res: any) => {
+      if (!this.dayHistData[type]) { this.dayHistData[type] = {}; }
+      this.dayHistData[type][agg] = res.aggregations.trips_per_hours.buckets;
+    });
   }
+
 
   private updateMonthChart() {
     const table = [['Day', 'Bike', 'Walk', 'PT']];
