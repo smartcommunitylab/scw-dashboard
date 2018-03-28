@@ -110,7 +110,7 @@ export class DbTripsComponent implements OnInit {
     this.getDayAgg('PT', this.currentTime);
     this.getHist('Walk', 'day', moment(month).toDate().getTime(), this.currentTime);
     this.getHist('Bike', 'day', moment(month).toDate().getTime(), this.currentTime);
-    this.getHist('PT', 'hour', moment(month).toDate().getTime(), this.currentTime);
+    this.getHist('PT', 'day', moment(month).toDate().getTime(), this.currentTime);
     this.getHist('Walk', 'hour', moment(day).toDate().getTime(), this.currentTime);
     this.getHist('Bike', 'hour', moment(day).toDate().getTime(), this.currentTime);
     this.getHist('PT', 'hour', moment(day).toDate().getTime(), this.currentTime);
