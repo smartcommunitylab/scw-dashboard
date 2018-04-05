@@ -109,6 +109,7 @@ export class DbAriaComponent implements OnInit {
   }
 
   private updateData(event?: number) {
+    console.log(this.stationData);
     if (event) { this.currentTime = event; }
     const now = moment(this.currentTime);
     const month = moment(now).subtract(30, 'days').format('YYYY-MM-DD HH:mm');
@@ -158,6 +159,7 @@ export class DbAriaComponent implements OnInit {
     return Math.max(NO2, O3, PM10, PM25);
   }
 
+  //needed?
   private updateStations() {
     const start = moment(this.currentTime).format('YYYY-MM-DD');
     const day = this.monthData.filter((e) => e.resdate >= start);

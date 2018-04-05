@@ -6,7 +6,9 @@
           <div class="element">
             <div class="card border-secondary mb-3">
               <div class="card-body">
-                <h4 class="card-title">BIKE</h4>
+                <h4 class="card-title">BIKE
+                  <span *ngIf="dayAggData['Bike']">: {{dayAggData['Bike'].value}}</span>
+                </h4>
                 <google-chart [data]="dayChartBike" *ngIf="dayChartBike"></google-chart>
               </div>
             </div>
@@ -14,7 +16,9 @@
           <div class="element">
             <div class="card border-secondary mb-3">
               <div class="card-body">
-                <h4 class="card-title">WALK</h4>
+                <h4 class="card-title">WALK
+                    <span *ngIf="dayAggData['Walk']">: {{dayAggData['Walk'].value}}</span>
+                </h4>
                 <google-chart [data]="dayChartWalk" *ngIf="dayChartWalk"></google-chart>
               </div>
             </div>
@@ -22,7 +26,9 @@
           <div class="element">
             <div class="card border-secondary mb-3">
               <div class="card-body">
-                <h4 class="card-title">TP</h4>
+                <h4 class="card-title">TP
+                    <span *ngIf="dayAggData['PT']">: {{dayAggData['PT'].value}}</span>
+                </h4>
                 <google-chart [data]="dayChartTP" *ngIf="dayChartTP"></google-chart>
               </div>
             </div>

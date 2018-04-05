@@ -7,7 +7,7 @@
             <div class="card border-secondary mb-3">
               <div class="card-body">
                 <h4 class="card-title">REGISTRATI</h4>
-                <!-- <google-chart [data]="dayChartRegistrati" *ngIf="dayChartRegistrati"></google-chart>-->
+                <google-chart [data]="dayChartRegistrati" *ngIf="dayChartRegistrati"></google-chart>
               </div>
             </div>
           </div>
@@ -15,7 +15,7 @@
             <div class="card border-secondary mb-3">
               <div class="card-body">
                 <h4 class="card-title">ATTIVI</h4>
-                <!--<google-chart [data]="dayChartAttivi" *ngIf="dayChartAttivi"></google-chart>-->
+                <google-chart [data]="dayChartAttivi" *ngIf="dayChartAttivi"></google-chart>
               </div>
             </div>
           </div>
@@ -23,7 +23,7 @@
             <div class="card border-secondary mb-3">
               <div class="card-body">
                 <h4 class="card-title">AZIONI</h4>
-                <!--<google-chart [data]="dayChartAzioni" *ngIf="dayChartAzioni"></google-chart>-->
+                <google-chart [data]="dayChartAzioni" *ngIf="dayChartAzioni"></google-chart>
               </div>
             </div>
           </div>
@@ -38,19 +38,19 @@
                 <aol-layer-tile>
                     <aol-source-osm></aol-source-osm>
                 </aol-layer-tile>
-                <aol-overlay *ngFor="let station of stations">
+                <aol-overlay *ngFor="let city of cities">
                     <aol-coordinate
-                        [x]="station.X"
-                        [y]="station.Y"
+                        [x]="city.X"
+                        [y]="city.Y"
                         [srid]="'EPSG:4326'"
                     >
                     </aol-coordinate>
                     <aol-content>
-                        < <div (click)="stationSelected(station)" [class]="'station '+(station.id == currentStation? 'selected ':'')+ (stationData[station.id]? stationData[station.id].style: '')" > -->
-                          <div *ngIf="stationData[station.id] && station.id == currentStation">
-                            <b>REGISTRATI</b>:  {{stationData[station.id]['registrati'] | number}} <br/> 
-                            <b>ATTIVI</b>: {{stationData[station.id]['attivi'] | number}}<br/>
-                            <b>AZIONI</b>: {{stationData[station.id]['azioni'] | number}}
+                        <div (click)="citySelected(city)" [class]="'station '+(city.name == currentCity? 'selected ':'')+ (dayAggData[city.name]? dayAggData[city.name].style : '')" >
+                          <div *ngIf="dayAggData[city.name] && city.name == currentCity">
+                            <b>REGISTRATI</b>: {{dayAggData[city.name]['Registrati'] | number}}<br/>
+                            <b>ATTIVI</b>: {{dayAggData[city.name]['Attivi'] | number}}<br/>
+                            <b>AZIONI</b>: {{dayAggData[city.name]['Azioni'] | number}}
                           </div>
                         </div>
                     </aol-content>
