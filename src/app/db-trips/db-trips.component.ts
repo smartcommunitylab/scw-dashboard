@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs/Observable';
+import { forkJoin } from "rxjs/observable/forkJoin";
 
 import * as moment from 'moment';
 import { TimeFormatter } from '../db-aria/db-aria.component';
 
 const API = 'https://scw.smartcommunitylab.it/es/gamification-stats-59a91478e4b0c9db6800afaf-*/_search';
-const TYPES = ['Bike', 'Walk', 'PT'];
+const TYPES = ['Walk', 'Bike', 'PT'];
 
 @Component({
   selector: 'app-db-trips',
@@ -32,9 +34,7 @@ export class DbTripsComponent implements OnInit {
 
   dayAggData = {}; //{"Bike": {"value": 67}, "Walk": {"value": 67}, "PT": {"value": 67}}
   dayHistData = {}; //{"Walk": {"hour": [{"key_as_string":"1517803200000","key":1517803200000,"doc_count":2,"trips":{"value":2.0},"cumulative_trips":{"value":2.0}}, ...]}}
-  monthDataWalk = {};
-  monthDataBike = {};
-  monthDataPT = {};
+  monthData = [];
 
   /*****
    * START TIMER RELATED OPERATIONS
@@ -114,15 +114,6 @@ export class DbTripsComponent implements OnInit {
     this.getDayHist('Bike', 'hour', moment(day).toDate().getTime(), this.currentTime);
     this.getDayHist('PT', 'hour', moment(day).toDate().getTime(), this.currentTime);
     this.getMonthHist(moment(month).toDate().getTime(), this.currentTime);
-
-    // last month for current station (week and month view)
-    // this.http.get(`${API}/PeriodData/${this.currentStation}?fromTime=${month}&toTime=${to}`)
-    // .subscribe((data) => {
-    //   this.monthData = (data as any).Result.Element;
-    //   this.updateMonthChart();
-    //   this.updateWeekChart();
-    //   this.updatecities();
-    // });
   }
 
   /**
@@ -182,19 +173,46 @@ export class DbTripsComponent implements OnInit {
   }
 
   getMonthHist(from: number, to: number) {
-    //TODO come prendere i dati per tutti e tre i tipi e chiamare updateMonthChart una volta sola?
+    let monthData = {};
+    // tslint:disable-next-line:max-line-length
+    let walkQuery = {size: 0, query: {bool: {must : [ {match : {eventType : 'PointConcept'}}, {match : {conceptName : 'Walk_Trips'}}, { range : { executionTime : {from : from, to : to}}}]}},
+    aggs : {trips_per_hours : { date_histogram : {field : 'executionTime', interval : 'day' }, aggs: {trips: {sum: {field: 'deltaScore'}}, cumulative_trips: { cumulative_sum: { buckets_path: 'trips' }}}}}};
+    // tslint:disable-next-line:max-line-length
+    let bikeQuery = {size: 0, query: {bool: {must : [ {match : {eventType : 'PointConcept'}}, {match : {conceptName : 'Bike_Trips'}}, { range : { executionTime : {from : from, to : to}}}]}},
+    aggs : {trips_per_hours : { date_histogram : {field : 'executionTime', interval : 'day' }, aggs: {trips: {sum: {field: 'deltaScore'}}, cumulative_trips: { cumulative_sum: { buckets_path: 'trips' }}}}}};
+    // tslint:disable-next-line:max-line-length
+    let ptQuery = {size: 0, query: {bool: {must : [ {match : {eventType : 'PointConcept'}}, {bool : {should: [{match: {conceptName : 'Bus_Trips'}}, {match: {conceptName : 'Train_Trips'}}]}}, { range : { executionTime : {from : from, to : to}}}]}},
+    aggs : {trips_per_hours : { date_histogram : {field : 'executionTime', interval : 'day' }, aggs: {trips: {sum: {field: 'deltaScore'}}, cumulative_trips: { cumulative_sum: { buckets_path: 'trips' }}}}}};
+
+    let monthDataWalk = this.http.post(API, walkQuery);
+    let monthDataBike = this.http.post(API, bikeQuery);
+    let monthDataPT = this.http.post(API, ptQuery);
+
+    forkJoin([monthDataWalk, monthDataBike, monthDataPT]).subscribe(results => {
+      TYPES.forEach((t) => {
+        if (!monthData[t]) { monthData[t] = []; }
+        monthData[t] = results[TYPES.indexOf(t)]['aggregations'].trips_per_hours.buckets;
+      });
+      console.log(monthData);
+      Object.keys(monthData).forEach(k => {
+        monthData[k].forEach(e => {
+          this.monthData.push({'resdate': moment(e.key).toDate().toISOString(), 'name': k, 'val': e.trips.value});
+        });
+      });
+      console.log('month', this.monthData);
+      this.updateMonthChart();
+      this.updateWeekChart();
+    });
   }
 
   private updateMonthChart() {
-    const table = [['Day', 'Bike', 'Walk', 'PT']];
+    const table = [['Day', 'Walk', 'Bike', 'TP']];
     const map = {};
-    /*
     this.monthData.forEach((e) => {
       if (!map[e.resdate]) {map[e.resdate] = [0, 0, 0]; }
       const idx = TYPES.indexOf(e.name);
       if (idx >= 0) {map[e.resdate][idx] = e.val; }
     });
-    */
     Object.keys(map).forEach((d) => table.push([d].concat(map[d])));
     if (this.monthChart) {
       this.monthChart = Object.create(this.monthChart);
@@ -212,14 +230,14 @@ export class DbTripsComponent implements OnInit {
     const table = [['Day', 'Bike', 'Walk', 'PT']];
     const map = {};
     const start = moment(this.currentTime).subtract(7, 'days').format('YYYY-MM-DD');
-    /*
+    
     const week = this.monthData.filter((e) => e.resdate >= start);
     week.forEach((e) => {
       if (!map[e.resdate]) {map[e.resdate] = [0, 0, 0]; }
       const idx = TYPES.indexOf(e.name);
       if (idx >= 0) {map[e.resdate][idx] = e.val; }
     });
-    */
+    
     Object.keys(map).forEach((d) => table.push([d].concat(map[d])));
     if (this.weekChart) {
       this.weekChart = Object.create(this.weekChart);

@@ -197,6 +197,7 @@ export class DbAriaComponent implements OnInit {
       const idx = TYPES.indexOf(e.name);
       if (idx >= 0) {map[e.resdate][idx] = e.val; }
     });
+    
     Object.keys(map).forEach((d) => table.push([d].concat(map[d])));
     if (this.weekChart) {
       this.weekChart = Object.create(this.weekChart);
