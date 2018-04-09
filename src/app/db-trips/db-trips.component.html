@@ -81,7 +81,7 @@
     </div>
     <div class="col col-md-2">
       <span class="fa player" [class.fa-play-circle]="!playing" [class.fa-pause-circle]="playing" (click)="playPause()"></span>
-      <nouislider [min]="minDate" [max]="maxDate" [(ngModel)]="currentTime" [config]="config" (change)="onChange($event)"></nouislider>
+      <nouislider [min]="0" [max]="maxVal" [(ngModel)]="currentSliderVal" [config]="config" (change)="onChange($event)"></nouislider>
     </div>
   </div>
 </div>  

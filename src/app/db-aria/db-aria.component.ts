@@ -7,16 +7,17 @@ import { NouiFormatter } from 'nouislider';
 
 export class TimeFormatter implements NouiFormatter {
   to(value: number): string {
-    return moment(new Date(value)).format('DD/MM/YYYY');
+    return moment(MIN_DATE).add(value, 'days').format('DD/MM/YYYY');
   }
 
   from(value: string): number {
-    return moment(value).toDate().getTime();
+    return moment(value, 'DD/MM/YYYY').diff(MIN_DATE, 'days');
   }
 }
 
 const API = 'https://am-test.smartcommunitylab.it/dss/services/ariadb';
 const TYPES = ['PM10', 'PM2.5', 'SO2'];
+const MIN_DATE = moment('2017-09-10').toDate().getTime();
 
 @Component({
   selector: 'app-db-aria',
@@ -41,20 +42,19 @@ export class DbAriaComponent implements OnInit {
   /*****
    * START TIMER RELATED OPERATIONS
    *****/
-  minDate = moment('2017-09-10').toDate().getTime();
-  maxDate = moment().toDate().getTime();
-  step = 1000 * 60 * 60 * 24;
-  currentTime = this.minDate;
+  maxVal = moment().diff(MIN_DATE, 'days');
+  currentSliderVal = 0;
+  currentTime = MIN_DATE;
   currentTimeFormatted = moment(this.currentTime).subtract(1, 'days').locale('it').format('DD MMM YYYY');
   timer: any;
 
   public config: any = {
     range: {
-      min: this.minDate,
-      max: this.maxDate
+      min: 0,
+      max: this.maxVal
     },
     direction: 'rtl',
-    step: this.step,
+    step: 1,
     orientation: 'vertical',
     tooltips: new TimeFormatter(),
     pips: { mode: 'count', stepped: true, density: 2, values: 5, format: new TimeFormatter() }
@@ -64,7 +64,8 @@ export class DbAriaComponent implements OnInit {
     if (this.playing) {
       this.playPause();
     }
-    this.updateData(value);
+    let newCurrentTime = moment(MIN_DATE).add(value, 'days').toDate().getTime();
+    this.updateData(newCurrentTime);
   }
   playPause() {
     if (this.playing) {
@@ -73,8 +74,8 @@ export class DbAriaComponent implements OnInit {
     } else {
       this.playing = true;
       this.timer = setInterval(() => {
-        if (!moment(this.currentTime).isBefore(moment(), 'day')) { this.currentTime = this.minDate; }
-        this.updateData(this.currentTime + 1000 * 60 * 60 * 24);
+        if (!moment(this.currentTime).isBefore(moment(), 'day')) { this.currentTime = MIN_DATE; }
+        this.updateData(moment(this.currentTime).add(1, 'days').toDate().getTime());
       }, 1000);
     }
   }
@@ -111,8 +112,9 @@ export class DbAriaComponent implements OnInit {
 
   private updateData(event?: number) {
     if (event) { this.currentTime = event; }
+    this.currentTimeFormatted = moment(this.currentTime).subtract(1, 'days').locale('it').format('DD MMM YYYY');
     const now = moment(this.currentTime);
-    //if (now.isDST()) { now.subtract(2, 'hours') }
+    if (now.isDST()) { now.subtract(2, 'hours') } else { now.subtract(1, 'hours') }
     const month = moment(now).subtract(30, 'days').format('YYYY-MM-DD HH:mm');
     const day = moment(now).subtract(1, 'days').format('YYYY-MM-DD HH:mm');
     const to = now.format('YYYY-MM-DD HH:mm');
