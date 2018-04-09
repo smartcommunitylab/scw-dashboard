@@ -43,6 +43,7 @@ export class DbTripsComponent implements OnInit {
   maxDate = moment().toDate().getTime();
   step = 1000 * 60 * 60 * 24;
   currentTime = this.minDate;
+  currentTimeFormatted = moment(this.currentTime).subtract(1, 'days').locale('it').format('DD MMM YYYY');
   timer: any;
 
   public config: any = {
@@ -174,6 +175,7 @@ export class DbTripsComponent implements OnInit {
 
   getMonthHist(from: number, to: number) {
     let monthData = {};
+    let newMonthData = [];
     // tslint:disable-next-line:max-line-length
     let walkQuery = {size: 0, query: {bool: {must : [ {match : {eventType : 'PointConcept'}}, {match : {conceptName : 'Walk_Trips'}}, { range : { executionTime : {from : from, to : to}}}]}},
     aggs : {trips_per_hours : { date_histogram : {field : 'executionTime', interval : 'day' }, aggs: {trips: {sum: {field: 'deltaScore'}}, cumulative_trips: { cumulative_sum: { buckets_path: 'trips' }}}}}};
@@ -193,13 +195,12 @@ export class DbTripsComponent implements OnInit {
         if (!monthData[t]) { monthData[t] = []; }
         monthData[t] = results[TYPES.indexOf(t)]['aggregations'].trips_per_hours.buckets;
       });
-      console.log(monthData);
       Object.keys(monthData).forEach(k => {
         monthData[k].forEach(e => {
-          this.monthData.push({'resdate': moment(e.key).toDate().toISOString(), 'name': k, 'val': e.trips.value});
+          newMonthData.push({'resdate': moment(e.key).toDate().toISOString(), 'name': k, 'val': e.trips.value});
         });
       });
-      console.log('month', this.monthData);
+      this.monthData = newMonthData;
       this.updateMonthChart();
       this.updateWeekChart();
     });
@@ -213,7 +214,7 @@ export class DbTripsComponent implements OnInit {
       const idx = TYPES.indexOf(e.name);
       if (idx >= 0) {map[e.resdate][idx] = e.val; }
     });
-    Object.keys(map).forEach((d) => table.push([d].concat(map[d])));
+    Object.keys(map).forEach((d) => table.push([moment(d).locale('it').format('DD MMM')].concat(map[d])));
     if (this.monthChart) {
       this.monthChart = Object.create(this.monthChart);
       this.monthChart.dataTable = table;
@@ -221,13 +222,14 @@ export class DbTripsComponent implements OnInit {
       this.monthChart = {
         chartType: 'LineChart',
         dataTable: table,
-        options: {legend: 'none', height: 130, chartArea: {left: 0, top: 0, width: '100%', height: 120}, hAxis: {textPosition: 'none'}}
+        options: {legend: 'none', height: 130, chartArea: {left: '3.5%', top: '5%', width: '95%', height: '79%'},
+          hAxis: {textPosition: 'out', showTextEvery: 5}, colors: ['#0000ff', '#ff0000', '#ffe800']}
       };
     }
   }
 
   private updateWeekChart() {
-    const table = [['Day', 'Bike', 'Walk', 'PT']];
+    const table = [['Day', 'Walk', 'Bike', 'PT']];
     const map = {};
     const start = moment(this.currentTime).subtract(7, 'days').format('YYYY-MM-DD');
     
@@ -237,8 +239,8 @@ export class DbTripsComponent implements OnInit {
       const idx = TYPES.indexOf(e.name);
       if (idx >= 0) {map[e.resdate][idx] = e.val; }
     });
-    
-    Object.keys(map).forEach((d) => table.push([d].concat(map[d])));
+
+    Object.keys(map).forEach((d) => table.push([moment(d).locale('it').format('ddd DD')].concat(map[d])));
     if (this.weekChart) {
       this.weekChart = Object.create(this.weekChart);
       this.weekChart.dataTable = table;
@@ -246,12 +248,14 @@ export class DbTripsComponent implements OnInit {
       this.weekChart = {
         chartType: 'ColumnChart',
         dataTable: table,
-        options: {legend: 'none', height: 130, chartArea: {left: 0, top: 0, width: '100%', height: 120}, hAxis: {textPosition: 'none'}}
+        options: {legend: 'none', height: 130, chartArea: {left: '6%', top: '5%', width: '100%', height: '79%'},
+          hAxis: {textPosition: 'out'}, colors: ['#0000ff', '#ff0000', '#ffe800']}
       };
     }
   }
 
   private updateChart(chart: any, attr: string) {
+    let colors = {'Walk': '#0000ff', 'Bike': '#ff0000', 'PT': '#ffe800'};
     let dayData = [];
     let filteredData = this.dayHistData[attr]['hour']; //[{"key_as_string":"1517803200000","key":1517803200000,"doc_count":2,"trips":{"value":2.0},"cumulative_trips":{"value":2.0}}, ...]
     filteredData.forEach((e) => {
@@ -260,6 +264,10 @@ export class DbTripsComponent implements OnInit {
 
     let table = [['Day', attr]];
     const day = dayData.filter((e) => e.name === attr).map((e) => [e.resulttime, parseFloat(e.value)]);
+    day.forEach((e) => {
+      let formattedTime = moment(e[0]).locale('it').format('HH:mm');//ddd DD HH:mm
+      e[0] = formattedTime;
+    });
     table = table.concat(day);
     let newChart = null;
     if (table.length <= 1) {
@@ -273,7 +281,8 @@ export class DbTripsComponent implements OnInit {
       newChart = {
         chartType: 'LineChart',
         dataTable: table,
-        options: {legend: 'none', height: 90, chartArea: {left: 0, top: 0, width: '100%', height: 80}, hAxis: {textPosition: 'none'}}
+        options: {legend: 'none', height: 90, chartArea: {left: '6%', top: '5%', width: '100%', height: '79%'},
+          hAxis: {textPosition: 'out', showTextEvery: 6}, colors: [colors[attr]]}
       };
     }
     return newChart;

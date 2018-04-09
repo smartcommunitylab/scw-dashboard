@@ -4,6 +4,9 @@
       <div class="row">
         <div class="col col-md-4">
           <div class="element">
+            <h4 class="card-title">Andamento orario {{currentTimeFormatted}}</h4>
+          </div>
+          <div class="element">
             <div class="card border-secondary mb-3">
               <div class="card-body">
                 <h4 class="card-title">REGISTRATI</h4>
@@ -48,9 +51,9 @@
                     <aol-content>
                         <div (click)="citySelected(city)" [class]="'station '+(city.name == currentCity? 'selected ':'')+ (dayAggData[city.name]? dayAggData[city.name].style : '')" >
                           <div *ngIf="dayAggData[city.name] && city.name == currentCity">
-                            <b>REGISTRATI</b>: {{dayAggData[city.name]['Registrati'] | number}}<br/>
-                            <b>ATTIVI</b>: {{dayAggData[city.name]['Attivi'] | number}}<br/>
-                            <b>AZIONI</b>: {{dayAggData[city.name]['Azioni'] | number}}
+                            <b>REGISTRATI</b>: {{dayAggData[city.name].Registrati | number}}<br/>
+                            <b>ATTIVI</b>: {{dayAggData[city.name].Attivi | number}}<br/>
+                            <b>AZIONI</b>: {{dayAggData[city.name].Azioni | number}}
                           </div>
                         </div>
                     </aol-content>

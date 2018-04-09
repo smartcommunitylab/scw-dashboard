@@ -40,6 +40,7 @@ export class DbParticipationComponent implements OnInit {
   maxDate = moment().toDate().getTime();
   step = 1000 * 60 * 60 * 24;
   currentTime = this.minDate;
+  currentTimeFormatted = moment(this.currentTime).subtract(1, 'days').locale('it').format('DD MMM YYYY');
   timer: any;
 
   public config: any = {
@@ -79,7 +80,7 @@ export class DbParticipationComponent implements OnInit {
   ngOnInit() {
     this.updateData(null);
     this.initMap();
-    console.log(this.dayAggData[this.currentCity]);
+    console.log(this.dayAggData);
   }
 
   initMap() {
@@ -120,16 +121,6 @@ export class DbParticipationComponent implements OnInit {
     this.getDayHist('Attivi', moment(day).toDate().getTime(), this.currentTime, this.currentCity);
     this.getDayHist('Azioni', moment(day).toDate().getTime(), this.currentTime, this.currentCity);
     this.getMonthHist(this.currentCity, moment(month).toDate().getTime(), this.currentTime);
-    /*
-    // last month for current station (week and month view)
-    this.http.get(`${API}/PeriodData/${this.currentStation}?fromTime=${month}&toTime=${to}`)
-    .subscribe((data) => {
-      this.monthData = (data as any).Result.Element;
-      this.updateMonthChart();
-      this.updateWeekChart();
-      this.updateStations();
-    });
-    */
   }
 
   //needed?
@@ -219,6 +210,7 @@ export class DbParticipationComponent implements OnInit {
 
   private getMonthHist(residence: string, from: number, to: number) {
     let monthData = {};
+    let newMonthData = [];
     // tslint:disable-next-line:max-line-length
     let regQuery = {size: 0, query: {bool: {must: [{match: {eventType : 'UserCreation'}},{match: {residence : residence}},{range: {executionTime : {from: from, to : to}}}]}},
     aggs : {by_date: {date_histogram: {field : 'executionTime', interval : 'day'}, aggs: {operations: {value_count: {field : 'playerId'}}, cumulative_operations: {cumulative_sum: {buckets_path : 'operations'}}}}}};
@@ -238,13 +230,12 @@ export class DbParticipationComponent implements OnInit {
         if (!monthData[t]) { monthData[t] = []; }
         monthData[t] = results[TYPES.indexOf(t)]['aggregations'].by_date.buckets;
       });
-      console.log(monthData);
       Object.keys(monthData).forEach(k => {
         monthData[k].forEach(e => {
-          this.monthData.push({'resdate': moment(e.key).toDate().toISOString(), 'name': k, 'val': e.operations.value});
+          newMonthData.push({'resdate': moment(e.key).toDate().toISOString(), 'name': k, 'val': e.operations.value});
         });
       });
-      console.log('month', this.monthData);
+      this.monthData = newMonthData;
       this.updateMonthChart();
       this.updateWeekChart();
     });
@@ -262,7 +253,7 @@ export class DbParticipationComponent implements OnInit {
       const idx = TYPES.indexOf(e.name);
       if (idx >= 0) {map[e.resdate][idx] = e.val; }
     });
-    Object.keys(map).forEach((d) => table.push([d].concat(map[d])));
+    Object.keys(map).forEach((d) => table.push([moment(d).locale('it').format('DD MMM')].concat(map[d])));
     if (this.monthChart) {
       this.monthChart = Object.create(this.monthChart);
       this.monthChart.dataTable = table;
@@ -270,7 +261,8 @@ export class DbParticipationComponent implements OnInit {
       this.monthChart = {
         chartType: 'LineChart',
         dataTable: table,
-        options: {legend: 'none', height: 130, chartArea: {left: 0, top: 0, width: '100%', height: 120}, hAxis: {textPosition: 'none'}}
+        options: {legend: 'none', height: 130, chartArea: {left: '3.5%', top: '5%', width: '95%', height: '79%'},
+          hAxis: {textPosition: 'out', showTextEvery: 5}, colors: ['#0000ff', '#ff0000', '#ffe800']}
       };
     }
   }
@@ -287,7 +279,7 @@ export class DbParticipationComponent implements OnInit {
       if (idx >= 0) {map[e.resdate][idx] = e.val; }
     });
     
-    Object.keys(map).forEach((d) => table.push([d].concat(map[d])));
+    Object.keys(map).forEach((d) => table.push([moment(d).locale('it').format('ddd DD')].concat(map[d])));
     if (this.weekChart) {
       this.weekChart = Object.create(this.weekChart);
       this.weekChart.dataTable = table;
@@ -295,20 +287,25 @@ export class DbParticipationComponent implements OnInit {
       this.weekChart = {
         chartType: 'ColumnChart',
         dataTable: table,
-        options: {legend: 'none', height: 130, chartArea: {left: 0, top: 0, width: '100%', height: 120}, hAxis: {textPosition: 'none'}}
+        options: {legend: 'none', height: 130, chartArea: {left: '6%', top: '5%', width: '100%', height: '79%'},
+          hAxis: {textPosition: 'out'}, colors: ['#0000ff', '#ff0000', '#ffe800']}
       };
     }
   }
 
   private updateChart(chart: any, attr: string) {
+    let colors = {'Registrati': '#0000ff', 'Attivi': '#ff0000', 'Azioni': '#ffe800'};
     let dayData = [];
-    //console.log(this.dayHistData)
     this.dayHistData[attr].forEach((e) => {
       dayData.push({ "value": String(e.operations.value), "name": attr, "resulttime": moment(e.key).toDate().toISOString() });
     });
 
     let table = [['Day', attr]];
     const day = dayData.filter((e) => e.name === attr).map((e) => [e.resulttime, parseFloat(e.value)]);
+    day.forEach((e) => {
+      let formattedTime = moment(e[0]).locale('it').format('HH:mm');//ddd DD HH:mm
+      e[0] = formattedTime;
+    });
     table = table.concat(day);
     let newChart = null;
     if (table.length <= 1) {
@@ -322,7 +319,8 @@ export class DbParticipationComponent implements OnInit {
       newChart = {
         chartType: 'LineChart',
         dataTable: table,
-        options: {legend: 'none', height: 90, chartArea: {left: 0, top: 0, width: '100%', height: 80}, hAxis: {textPosition: 'none'}}
+        options: {legend: 'none', height: 90, chartArea: {left: '6%', top: '5%', width: '100%', height: '79%'},
+          hAxis: {textPosition: 'out', showTextEvery: 6}, colors: [colors[attr]]}
       };
     }
     return newChart;

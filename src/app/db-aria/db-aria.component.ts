@@ -45,6 +45,7 @@ export class DbAriaComponent implements OnInit {
   maxDate = moment().toDate().getTime();
   step = 1000 * 60 * 60 * 24;
   currentTime = this.minDate;
+  currentTimeFormatted = moment(this.currentTime).subtract(1, 'days').locale('it').format('DD MMM YYYY');
   timer: any;
 
   public config: any = {
@@ -109,9 +110,9 @@ export class DbAriaComponent implements OnInit {
   }
 
   private updateData(event?: number) {
-    console.log(this.stationData);
     if (event) { this.currentTime = event; }
     const now = moment(this.currentTime);
+    //if (now.isDST()) { now.subtract(2, 'hours') }
     const month = moment(now).subtract(30, 'days').format('YYYY-MM-DD HH:mm');
     const day = moment(now).subtract(1, 'days').format('YYYY-MM-DD HH:mm');
     const to = now.format('YYYY-MM-DD HH:mm');
@@ -166,6 +167,7 @@ export class DbAriaComponent implements OnInit {
   }
 
   private updateMonthChart() {
+    //NOTE: log scale can only be used for continuous axis, i.e. not with string values; idea: convert string to date, use ticks to choose text to display
     const table = [['Day', 'PM10', 'PM2.5', 'SO2']];
     const map = {};
     this.monthData.forEach((e) => {
@@ -173,7 +175,7 @@ export class DbAriaComponent implements OnInit {
       const idx = TYPES.indexOf(e.name);
       if (idx >= 0) {map[e.resdate][idx] = e.val; }
     });
-    Object.keys(map).forEach((d) => table.push([d].concat(map[d])));
+    Object.keys(map).forEach((d) => table.push([moment(d, 'YYYY-MM-DDZ').locale('it').format('DD MMM')].concat(map[d])));
     if (this.monthChart) {
       this.monthChart = Object.create(this.monthChart);
       this.monthChart.dataTable = table;
@@ -181,7 +183,8 @@ export class DbAriaComponent implements OnInit {
       this.monthChart = {
         chartType: 'LineChart',
         dataTable: table,
-        options: {legend: 'none', height: 130, chartArea: {left: 0, top: 0, width: '100%', height: 120}, hAxis: {textPosition: 'none'}}
+        options: {legend: 'none', height: 130, chartArea: {left: '3.5%', top: '5%', width: '95%', height: '79%'},
+          hAxis: {textPosition: 'out', showTextEvery: 5}, colors: ['#0000ff', '#ff0000', '#ffe800']}
       };
     }
   }
@@ -197,8 +200,8 @@ export class DbAriaComponent implements OnInit {
       const idx = TYPES.indexOf(e.name);
       if (idx >= 0) {map[e.resdate][idx] = e.val; }
     });
-    
-    Object.keys(map).forEach((d) => table.push([d].concat(map[d])));
+
+    Object.keys(map).forEach((d) => table.push([moment(d, 'YYYY-MM-DDZ').locale('it').format('ddd DD')].concat(map[d])));
     if (this.weekChart) {
       this.weekChart = Object.create(this.weekChart);
       this.weekChart.dataTable = table;
@@ -206,14 +209,20 @@ export class DbAriaComponent implements OnInit {
       this.weekChart = {
         chartType: 'ColumnChart',
         dataTable: table,
-        options: {legend: 'none', height: 130, chartArea: {left: 0, top: 0, width: '100%', height: 120}, hAxis: {textPosition: 'none'}}
+        options: {legend: 'none', height: 130, chartArea: {left: '6%', top: '5%', width: '100%', height: '79%'},
+          hAxis: {textPosition: 'out'}, colors: ['#0000ff', '#ff0000', '#ffe800']}
       };
     }
   }
 
   private updateChart(chart: any, attr: string) {
+    let colors = {'PM10': '#0000ff', 'PM2.5': '#ff0000', 'SO2': '#ffe800'};
     let table = [['Day', attr]];
     const day = this.dayData.filter((e) => e.name === attr).map((e) => [e.resulttime, parseFloat(e.value)]);
+    day.forEach((e) => {
+      let formattedTime = moment(e[0]).locale('it').format('HH:mm');//ddd DD HH:mm
+      e[0] = formattedTime;
+    });
     table = table.concat(day);
     let newChart = null;
     if (table.length <= 1) {
@@ -227,9 +236,14 @@ export class DbAriaComponent implements OnInit {
       newChart = {
         chartType: 'LineChart',
         dataTable: table,
-        options: {legend: 'none', height: 90, chartArea: {left: 0, top: 0, width: '100%', height: 80}, hAxis: {textPosition: 'none'}}
+        options: {legend: 'none', height: 90, chartArea: {left: '6%', top: '5%', width: '100%', height: '79%'},
+          hAxis: {textPosition: 'out', showTextEvery: 6}, colors: [colors[attr]]}
       };
     }
     return newChart;
   }
+  /*
+  Al 29 ottobre lo slider cambia l'ora a 23.00 per la fine dell'ora solare, quindi i valori da questo in poi sono spostati.
+  I dati sono spostati avanti di due ore rispetto ai moment passati nei GET (la API applica il fuso): passare anche timezone nel format della richiesta?
+  */
 }

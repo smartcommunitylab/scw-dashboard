@@ -4,14 +4,7 @@
       <div class="row">
         <div class="col col-md-4">
           <div class="element">
-            <div class="card border-secondary mb-3">
-              <div class="card-body">
-                <h4 class="card-title">BIKE
-                  <span *ngIf="dayAggData['Bike']">: {{dayAggData['Bike'].value}}</span>
-                </h4>
-                <google-chart [data]="dayChartBike" *ngIf="dayChartBike"></google-chart>
-              </div>
-            </div>
+            <h4 class="card-title">Andamento orario {{currentTimeFormatted}}</h4>
           </div>
           <div class="element">
             <div class="card border-secondary mb-3">
@@ -20,6 +13,16 @@
                     <span *ngIf="dayAggData['Walk']">: {{dayAggData['Walk'].value}}</span>
                 </h4>
                 <google-chart [data]="dayChartWalk" *ngIf="dayChartWalk"></google-chart>
+              </div>
+            </div>
+          </div>
+          <div class="element">
+            <div class="card border-secondary mb-3">
+              <div class="card-body">
+                <h4 class="card-title">BIKE
+                  <span *ngIf="dayAggData['Bike']">: {{dayAggData['Bike'].value}}</span>
+                </h4>
+                <google-chart [data]="dayChartBike" *ngIf="dayChartBike"></google-chart>
               </div>
             </div>
           </div>
