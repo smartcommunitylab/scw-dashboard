@@ -253,7 +253,7 @@ export class DbTripsComponent implements OnInit {
         chartType: 'LineChart',
         dataTable: table,
         options: {legend: 'none', height: 130, chartArea: {left: '3.5%', top: '5%', width: '95%', height: '79%'},
-          hAxis: {textPosition: 'out', showTextEvery: 5}, colors: ['#0000ff', '#ff0000', '#ffe800']}
+          hAxis: {textPosition: 'out', showTextEvery: 5}, colors: ['#0000ff', '#ff0000', '#ff00ee']}
       };
     }
   }
@@ -279,13 +279,13 @@ export class DbTripsComponent implements OnInit {
         chartType: 'ColumnChart',
         dataTable: table,
         options: {legend: 'none', height: 130, chartArea: {left: '6%', top: '5%', width: '100%', height: '79%'},
-          hAxis: {textPosition: 'out'}, colors: ['#0000ff', '#ff0000', '#ffe800']}
+          hAxis: {textPosition: 'out'}, colors: ['#0000ff', '#ff0000', '#ff00ee']}
       };
     }
   }
 
   private updateChart(chart: any, attr: string) {
-    const colors = {'Walk': '#0000ff', 'Bike': '#ff0000', 'PT': '#ffe800'};
+    const colors = {'Walk': '#0000ff', 'Bike': '#ff0000', 'PT': '#ff00ee'};
     const dayData = [];
     const filteredData = this.dayHistData[attr]['hour']; // [{"key_as_string":"1517803200000","key":1517803200000,"doc_count":2,"trips":{"value":2.0},"cumulative_trips":{"value":2.0}}, ...]
     filteredData.forEach((e) => {

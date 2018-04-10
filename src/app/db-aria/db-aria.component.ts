@@ -189,7 +189,7 @@ export class DbAriaComponent implements OnInit {
         chartType: 'LineChart',
         dataTable: table,
         options: {legend: 'none', height: 130, chartArea: {left: '3.5%', top: '5%', width: '95%', height: '79%'},
-          hAxis: {textPosition: 'out', showTextEvery: 5}, colors: ['#0000ff', '#ff0000', '#ffe800']}
+          hAxis: {textPosition: 'out', showTextEvery: 5}, colors: ['#0000ff', '#ff0000', '#ff00ee']}
       };
     }
   }
@@ -215,13 +215,13 @@ export class DbAriaComponent implements OnInit {
         chartType: 'ColumnChart',
         dataTable: table,
         options: {legend: 'none', height: 130, chartArea: {left: '6%', top: '5%', width: '100%', height: '79%'},
-          hAxis: {textPosition: 'out'}, colors: ['#0000ff', '#ff0000', '#ffe800']}
+          hAxis: {textPosition: 'out'}, colors: ['#0000ff', '#ff0000', '#ff00ee']}
       };
     }
   }
 
   private updateChart(chart: any, attr: string) {
-    const colors = {'PM10': '#0000ff', 'PM2.5': '#ff0000', 'SO2': '#ffe800'};
+    const colors = {'PM10': '#0000ff', 'PM2.5': '#ff0000', 'SO2': '#ff00ee'};
     let table = [['Day', attr]];
     const day = this.dayData.filter((e) => e.name === attr).map((e) => [e.resulttime, parseFloat(e.value)]);
     day.forEach((e) => {
@@ -247,8 +247,4 @@ export class DbAriaComponent implements OnInit {
     }
     return newChart;
   }
-  /*
-  Al 29 ottobre lo slider cambia l'ora a 23.00 per la fine dell'ora solare, quindi i valori da questo in poi sono spostati.
-  I dati sono spostati avanti di due ore rispetto ai moment passati nei GET (la API applica il fuso): passare anche timezone nel format della richiesta?
-  */
 }

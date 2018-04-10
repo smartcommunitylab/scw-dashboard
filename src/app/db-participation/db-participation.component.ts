@@ -149,8 +149,7 @@ export class DbParticipationComponent implements OnInit {
         if (!this.dayAggData[residence]) { this.dayAggData[residence] = {}; }
         this.dayAggData[residence][type] = res.aggregations.unique_players.value;
         Object.keys(this.dayAggData).forEach((key) => {
-          // this.dayAggData[key].part_index = this.computePartIndex();
-          this.dayAggData[key].style = 'level1'; // + this.dayAggData[key].part_index;
+          this.dayAggData[key].style = 'level1';
         });
       });
     } else {
@@ -161,8 +160,7 @@ export class DbParticipationComponent implements OnInit {
         if (!this.dayAggData[residence]) { this.dayAggData[residence] = {}; }
         this.dayAggData[residence][type] = res.count;
         Object.keys(this.dayAggData).forEach((key) => {
-          // this.dayAggData[key].part_index = this.computePartIndex(); //TODO
-          this.dayAggData[key].style = 'level1'; // + this.dayAggData[key].part_index; //da level1 a level5
+          this.dayAggData[key].style = 'level1';
         });
       });
     }
@@ -191,7 +189,7 @@ export class DbParticipationComponent implements OnInit {
 
         this.http.post(API + '_search', daySumQuery).subscribe((res: any) => {
           if (!this.dayHistData[type]) { this.dayHistData[type] = {}; }
-          this.dayHistData[type] = res.aggregations.by_date.buckets; // dayHistData = {'Registrati': [{'key': 1234567890000, 'unique_players': {'value': 3}}]}
+          this.dayHistData[type] = res.aggregations.by_date.buckets; // dayHistData = {'Attivi': [{'key': 1234567890000, 'unique_players': {'value': 3}}]}
           // update day charts
           this.dayChartAttivi = this.updateChart(this.dayChartAttivi, 'Attivi');
         });
@@ -204,7 +202,7 @@ export class DbParticipationComponent implements OnInit {
 
         this.http.post(API + '_search', daySumQuery).subscribe((res: any) => {
           if (!this.dayHistData[type]) { this.dayHistData[type] = {}; }
-          this.dayHistData[type] = res.aggregations.by_date.buckets; // dayHistData = {'Registrati': [{'key': 1234567890000, 'unique_players': {'value': 3}}]}
+          this.dayHistData[type] = res.aggregations.by_date.buckets; // dayHistData = {'Azioni': [{'key': 1234567890000, 'unique_players': {'value': 3}}]}
           // update day charts
           this.dayChartAzioni = this.updateChart(this.dayChartAzioni, 'Azioni');
         });
@@ -268,7 +266,7 @@ export class DbParticipationComponent implements OnInit {
         dataTable: table,
         options: {legend: 'none', height: 130, chartArea: {left: '3.5%', top: '5%', width: '95%', height: '79%'},
         vAxis: {scaleType: 'log'},
-        hAxis: {textPosition: 'out', showTextEvery: 5}, colors: ['#0000ff', '#ff0000', '#ffe800']}
+        hAxis: {textPosition: 'out', showTextEvery: 5}, colors: ['#0000ff', '#ff0000', '#ff00ee']}
       };
     }
   }
@@ -295,13 +293,13 @@ export class DbParticipationComponent implements OnInit {
         dataTable: table,
         options: {legend: 'none', height: 130, chartArea: {left: '6%', top: '5%', width: '100%', height: '79%'},
           vAxis: {scaleType: 'log'},
-          hAxis: {textPosition: 'out'}, colors: ['#0000ff', '#ff0000', '#ffe800']}
+          hAxis: {textPosition: 'out'}, colors: ['#0000ff', '#ff0000', '#ff00ee']}
       };
     }
   }
 
   private updateChart(chart: any, attr: string) {
-    const colors = {'Registrati': '#0000ff', 'Attivi': '#ff0000', 'Azioni': '#ffe800'};
+    const colors = {'Registrati': '#0000ff', 'Attivi': '#ff0000', 'Azioni': '#ff00ee'};
     const dayData = [];
     this.dayHistData[attr].forEach((e) => {
       dayData.push({ 'value': String(e.operations.value), 'name': attr, 'resulttime': moment(e.key).toDate().toISOString() });
@@ -310,7 +308,7 @@ export class DbParticipationComponent implements OnInit {
     let table = [['Day', attr]];
     const day = dayData.filter((e) => e.name === attr).map((e) => [e.resulttime, parseFloat(e.value)]);
     day.forEach((e) => {
-      const formattedTime = moment(e[0]).locale('it').format('HH:mm'); // ddd DD HH:mm
+      const formattedTime = moment(e[0]).locale('it').format('HH:mm');
       e[0] = formattedTime;
     });
     table = table.concat(day);
