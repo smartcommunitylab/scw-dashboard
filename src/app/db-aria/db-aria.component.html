@@ -31,8 +31,8 @@
             </div>
           </div>
         </div>
-        <div class="col col-md-8">
-            <aol-map [width]="'100%'" [height]="'450'">
+        <div class="col col-md-8 map-container">
+            <aol-map [width]="'100%'" [height]="'100%'">
                 <aol-interaction-default></aol-interaction-default>
                 <aol-control-defaults></aol-control-defaults>
                 <aol-view [zoom]="10">
@@ -51,11 +51,11 @@
                     <aol-content>
                         <div (click)="stationSelected(station)" [class]="'station '+(station.id == currentStation? 'selected ':'')+ (stationData[station.id]? stationData[station.id].style: '')" >
                           <div *ngIf="stationData[station.id] && station.id == currentStation" >
-                            <b>PM10</b>:  {{stationData[station.id].PM10 | number}} <br/> 
-                            <b>PM2.5</b>: {{stationData[station.id]['PM2.5'] | number}}<br/>
-                            <b>NO2</b>: {{stationData[station.id].NO2 | number}}<br/>
-                            <b>SO2</b>: {{stationData[station.id].SO2 | number}}<br/>
-                            <b>O3</b>: {{stationData[station.id].O3 | number}}
+                            <span *ngIf="stationData[station.id].PM10"><b>PM10</b>:  {{stationData[station.id].PM10 | number}} <br/> </span>
+                            <span *ngIf="stationData[station.id]['PM2.5']"><b>PM2.5</b>: {{stationData[station.id]['PM2.5'] | number}}<br/></span>
+                            <span *ngIf="stationData[station.id].NO2"><b>NO2</b>: {{stationData[station.id].NO2 | number}}<br/></span>
+                            <span *ngIf="stationData[station.id].SO2"><b>SO2</b>: {{stationData[station.id].SO2 | number}}<br/></span>
+                            <span *ngIf="stationData[station.id].O3"><b>O3</b>: {{stationData[station.id].O3 | number}}</span>
                           </div>
                         </div>
                     </aol-content>

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
-import { forkJoin } from "rxjs/observable/forkJoin";
+import { forkJoin } from 'rxjs/observable/forkJoin';
 
 import * as moment from 'moment';
 import { TimeFormatter } from '../db-aria/db-aria.component';
@@ -23,7 +23,7 @@ export class DbTripsComponent implements OnInit {
     VERSION: '1.1.1',
     STYLES: '',
     LAYERS: 'mobility:trento_archi1day'
-  }; //layers
+  }; // layers
 
   currentType = ''; // TODO set when bike/walk/PT are clicked in the day charts, filters the trips shown on the map
   monthChart: any;
@@ -33,8 +33,9 @@ export class DbTripsComponent implements OnInit {
   dayChartTP: any;
   playing = false;
 
-  dayAggData = {}; //{"Bike": {"value": 67}, "Walk": {"value": 67}, "PT": {"value": 67}}
-  dayHistData = {}; //{"Walk": {"hour": [{"key_as_string":"1517803200000","key":1517803200000,"doc_count":2,"trips":{"value":2.0},"cumulative_trips":{"value":2.0}}, ...]}}
+  dayAggData = {}; // {"Bike": {"value": 67}, "Walk": {"value": 67}, "PT": {"value": 67}}
+  // tslint:disable-next-line:max-line-length
+  dayHistData = {}; // {"Walk": {"hour": [{"key_as_string":"1517803200000","key":1517803200000,"doc_count":2,"trips":{"value":2.0},"cumulative_trips":{"value":2.0}}, ...]}}
   monthData = [];
 
   /*****
@@ -62,7 +63,7 @@ export class DbTripsComponent implements OnInit {
     if (this.playing) {
       this.playPause();
     }
-    let newCurrentTime = moment(MIN_DATE).add(value, 'days').toDate().getTime();
+    const newCurrentTime = moment(MIN_DATE).add(value, 'days').toDate().getTime();
     this.updateData(newCurrentTime);
   }
   playPause() {
@@ -87,7 +88,7 @@ export class DbTripsComponent implements OnInit {
   }
 
   initMap() {
-    //TODO?
+    // TODO?
   }
 
   constructor(
@@ -110,10 +111,10 @@ export class DbTripsComponent implements OnInit {
     });
 
     // tslint:disable-next-line:max-line-length
-    this.getDayAgg('Walk', this.currentTime); //number of walk trips in the last day
-    this.getDayAgg('Bike', this.currentTime); //number of bike trips in the last day
-    this.getDayAgg('PT', this.currentTime); //number of PT trips in the last day
-    this.getDayHist('Walk', 'hour', moment(day).toDate().getTime(), this.currentTime); //walk trips per hour in the last day
+    this.getDayAgg('Walk', this.currentTime); // number of walk trips in the last day
+    this.getDayAgg('Bike', this.currentTime); // number of bike trips in the last day
+    this.getDayAgg('PT', this.currentTime); // number of PT trips in the last day
+    this.getDayHist('Walk', 'hour', moment(day).toDate().getTime(), this.currentTime); // walk trips per hour in the last day
     this.getDayHist('Bike', 'hour', moment(day).toDate().getTime(), this.currentTime);
     this.getDayHist('PT', 'hour', moment(day).toDate().getTime(), this.currentTime);
     this.getMonthHist(moment(month).toDate().getTime(), this.currentTime);
@@ -121,8 +122,8 @@ export class DbTripsComponent implements OnInit {
 
   /**
    * Get total number of trips of the given type in a day
-   * @param type 
-   * @param date 
+   * @param type
+   * @param date
    */
   getDayAgg(type: string, date: number) {
     const from = date - 1000 * 60 * 60 * 24;
@@ -157,7 +158,7 @@ export class DbTripsComponent implements OnInit {
     this.http.post(API, daySumQuery).subscribe((res: any) => {
       if (!this.dayHistData[type]) { this.dayHistData[type] = {}; }
       this.dayHistData[type][agg] = res.aggregations.trips_per_hours.buckets;
-      //update day charts
+      // update day charts
       switch (type) {
         case 'Walk': {
           this.dayChartWalk = this.updateChart(this.dayChartWalk, 'Walk');
@@ -176,21 +177,21 @@ export class DbTripsComponent implements OnInit {
   }
 
   getMonthHist(from: number, to: number) {
-    let monthData = {};
-    let newMonthData = [];
+    const monthData = {};
+    const newMonthData = [];
     // tslint:disable-next-line:max-line-length
-    let walkQuery = {size: 0, query: {bool: {must : [ {match : {eventType : 'PointConcept'}}, {match : {conceptName : 'Walk_Trips'}}, { range : { executionTime : {from : from, to : to}}}]}},
+    const walkQuery = {size: 0, query: {bool: {must : [ {match : {eventType : 'PointConcept'}}, {match : {conceptName : 'Walk_Trips'}}, { range : { executionTime : {from : from, to : to}}}]}},
     aggs : {trips_per_hours : { date_histogram : {field : 'executionTime', interval : 'day' }, aggs: {trips: {sum: {field: 'deltaScore'}}, cumulative_trips: { cumulative_sum: { buckets_path: 'trips' }}}}}};
     // tslint:disable-next-line:max-line-length
-    let bikeQuery = {size: 0, query: {bool: {must : [ {match : {eventType : 'PointConcept'}}, {match : {conceptName : 'Bike_Trips'}}, { range : { executionTime : {from : from, to : to}}}]}},
+    const bikeQuery = {size: 0, query: {bool: {must : [ {match : {eventType : 'PointConcept'}}, {match : {conceptName : 'Bike_Trips'}}, { range : { executionTime : {from : from, to : to}}}]}},
     aggs : {trips_per_hours : { date_histogram : {field : 'executionTime', interval : 'day' }, aggs: {trips: {sum: {field: 'deltaScore'}}, cumulative_trips: { cumulative_sum: { buckets_path: 'trips' }}}}}};
     // tslint:disable-next-line:max-line-length
-    let ptQuery = {size: 0, query: {bool: {must : [ {match : {eventType : 'PointConcept'}}, {bool : {should: [{match: {conceptName : 'Bus_Trips'}}, {match: {conceptName : 'Train_Trips'}}]}}, { range : { executionTime : {from : from, to : to}}}]}},
+    const ptQuery = {size: 0, query: {bool: {must : [ {match : {eventType : 'PointConcept'}}, {bool : {should: [{match: {conceptName : 'Bus_Trips'}}, {match: {conceptName : 'Train_Trips'}}]}}, { range : { executionTime : {from : from, to : to}}}]}},
     aggs : {trips_per_hours : { date_histogram : {field : 'executionTime', interval : 'day' }, aggs: {trips: {sum: {field: 'deltaScore'}}, cumulative_trips: { cumulative_sum: { buckets_path: 'trips' }}}}}};
 
-    let monthDataWalk = this.http.post(API, walkQuery);
-    let monthDataBike = this.http.post(API, bikeQuery);
-    let monthDataPT = this.http.post(API, ptQuery);
+    const monthDataWalk = this.http.post(API, walkQuery);
+    const monthDataBike = this.http.post(API, bikeQuery);
+    const monthDataPT = this.http.post(API, ptQuery);
 
     forkJoin([monthDataWalk, monthDataBike, monthDataPT]).subscribe(results => {
       TYPES.forEach((t) => {
@@ -234,7 +235,7 @@ export class DbTripsComponent implements OnInit {
     const table = [['Day', 'Walk', 'Bike', 'PT']];
     const map = {};
     const start = moment(this.currentTime).subtract(7, 'days').format('YYYY-MM-DD');
-    
+
     const week = this.monthData.filter((e) => e.resdate >= start);
     week.forEach((e) => {
       if (!map[e.resdate]) {map[e.resdate] = [0, 0, 0]; }
@@ -257,17 +258,17 @@ export class DbTripsComponent implements OnInit {
   }
 
   private updateChart(chart: any, attr: string) {
-    let colors = {'Walk': '#0000ff', 'Bike': '#ff0000', 'PT': '#ffe800'};
-    let dayData = [];
-    let filteredData = this.dayHistData[attr]['hour']; //[{"key_as_string":"1517803200000","key":1517803200000,"doc_count":2,"trips":{"value":2.0},"cumulative_trips":{"value":2.0}}, ...]
+    const colors = {'Walk': '#0000ff', 'Bike': '#ff0000', 'PT': '#ffe800'};
+    const dayData = [];
+    const filteredData = this.dayHistData[attr]['hour']; // [{"key_as_string":"1517803200000","key":1517803200000,"doc_count":2,"trips":{"value":2.0},"cumulative_trips":{"value":2.0}}, ...]
     filteredData.forEach((e) => {
-      dayData.push({ "value": String(e.trips.value), "name": attr, "resulttime": moment(e.key).toDate().toISOString() });
+      dayData.push({ 'value': String(e.trips.value), 'name': attr, 'resulttime': moment(e.key).toDate().toISOString() });
     });
 
     let table = [['Day', attr]];
     const day = dayData.filter((e) => e.name === attr).map((e) => [e.resulttime, parseFloat(e.value)]);
     day.forEach((e) => {
-      let formattedTime = moment(e[0]).locale('it').format('HH:mm');//ddd DD HH:mm
+      const formattedTime = moment(e[0]).locale('it').format('HH:mm'); // ddd DD HH:mm
       e[0] = formattedTime;
     });
     table = table.concat(day);

@@ -64,7 +64,7 @@ export class DbAriaComponent implements OnInit {
     if (this.playing) {
       this.playPause();
     }
-    let newCurrentTime = moment(MIN_DATE).add(value, 'days').toDate().getTime();
+    const newCurrentTime = moment(MIN_DATE).add(value, 'days').toDate().getTime();
     this.updateData(newCurrentTime);
   }
   playPause() {
@@ -114,7 +114,7 @@ export class DbAriaComponent implements OnInit {
     if (event) { this.currentTime = event; }
     this.currentTimeFormatted = moment(this.currentTime).subtract(1, 'days').locale('it').format('DD MMM YYYY');
     const now = moment(this.currentTime);
-    if (now.isDST()) { now.subtract(2, 'hours') } else { now.subtract(1, 'hours') }
+    if (now.isDST()) { now.subtract(2, 'hours'); } else { now.subtract(1, 'hours'); }
     const month = moment(now).subtract(30, 'days').format('YYYY-MM-DD HH:mm');
     const day = moment(now).subtract(1, 'days').format('YYYY-MM-DD HH:mm');
     const to = now.format('YYYY-MM-DD HH:mm');
@@ -162,14 +162,14 @@ export class DbAriaComponent implements OnInit {
     return Math.max(NO2, O3, PM10, PM25);
   }
 
-  //needed?
+  // needed?
   private updateStations() {
     const start = moment(this.currentTime).format('YYYY-MM-DD');
     const day = this.monthData.filter((e) => e.resdate >= start);
   }
 
   private updateMonthChart() {
-    //NOTE: log scale can only be used for continuous axis, i.e. not with string values; idea: convert string to date, use ticks to choose text to display
+    // NOTE: log scale can only be used for continuous axis, i.e. not with string values; idea: convert string to date, use ticks to choose text to display
     const table = [['Day', 'PM10', 'PM2.5', 'SO2']];
     const map = {};
     this.monthData.forEach((e) => {
@@ -218,11 +218,11 @@ export class DbAriaComponent implements OnInit {
   }
 
   private updateChart(chart: any, attr: string) {
-    let colors = {'PM10': '#0000ff', 'PM2.5': '#ff0000', 'SO2': '#ffe800'};
+    const colors = {'PM10': '#0000ff', 'PM2.5': '#ff0000', 'SO2': '#ffe800'};
     let table = [['Day', attr]];
     const day = this.dayData.filter((e) => e.name === attr).map((e) => [e.resulttime, parseFloat(e.value)]);
     day.forEach((e) => {
-      let formattedTime = moment(e[0]).locale('it').format('HH:mm');//ddd DD HH:mm
+      const formattedTime = moment(e[0]).locale('it').format('HH:mm'); // ddd DD HH:mm
       e[0] = formattedTime;
     });
     table = table.concat(day);
