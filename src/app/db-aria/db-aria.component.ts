@@ -111,7 +111,10 @@ export class DbAriaComponent implements OnInit {
   }
 
   private updateData(event?: number) {
-    if (event) { this.currentTime = event; }
+    if (event) {
+      this.currentTime = event;
+      this.currentSliderVal = moment(this.currentTime).diff(moment(MIN_DATE), 'days');
+    }
     this.currentTimeFormatted = moment(this.currentTime).subtract(1, 'days').locale('it').format('DD MMM YYYY');
     const now = moment(this.currentTime);
     if (now.isDST()) { now.subtract(2, 'hours'); } else { now.subtract(1, 'hours'); }

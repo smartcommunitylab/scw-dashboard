@@ -16,16 +16,21 @@ const MIN_DATE = moment('2017-09-10').toDate().getTime();
   styleUrls: ['./db-trips.component.css']
 })
 export class DbTripsComponent implements OnInit {
-
+  layers = {
+    'Walk': 'mobility:trento_archi1day_walk',
+    'Bike': 'mobility:trento_archi1day_bike',
+    'PT': 'mobility:trento_archi1day_pubtrans',
+    'total': 'mobility:trento_archi1day_total'
+  };
   wmsURL = 'http://maps.dedagroup.it/geoserver/mobility/wms';
   wmsParams = {
     FORMAT: 'image/png',
     VERSION: '1.1.1',
     STYLES: '',
-    LAYERS: 'mobility:trento_archi1day'
+    LAYERS: this.layers['total']
   }; // layers
 
-  currentType = ''; // TODO set when bike/walk/PT are clicked in the day charts, filters the trips shown on the map
+  currentType = this.layers['total']; // TODO set when bike/walk/PT/total are clicked in the day charts, filters the trips shown on the map
   monthChart: any;
   weekChart: any;
   dayChartWalk: any;
@@ -95,8 +100,27 @@ export class DbTripsComponent implements OnInit {
     private http: HttpClient,
   ) { }
 
+  cardSelected(type: string) { //Walk, Bike, PT
+    console.log('card clicked', type);
+    const old = this.wmsParams;
+    this.wmsParams = null;
+    setTimeout(() => {
+      if (this.currentType === this.layers[type]) {
+        old.LAYERS = this.layers['total'];
+        this.currentType = this.layers['total'];
+      } else {
+        old.LAYERS = this.layers[type];
+        this.currentType = this.layers[type];
+      }
+      this.wmsParams = old;
+    });
+  }
+
   private updateData(event?: number) {
-    if (event) { this.currentTime = event; }
+    if (event) {
+      this.currentTime = event;
+      this.currentSliderVal = moment(this.currentTime).diff(moment(MIN_DATE), 'days');
+    }
     this.currentTimeFormatted = moment(this.currentTime).subtract(1, 'days').locale('it').format('DD MMM YYYY');
     const now = moment(this.currentTime);
     const month = moment(now).subtract(30, 'days').format('YYYY-MM-DD HH:mm');
