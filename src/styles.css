@@ -71,8 +71,16 @@ nouislider, .noUi-vertical {
 
 .map-container {
   padding-bottom: 16px;
+  position: relative;
 }
 
 .col-md-4 .card-body {
   min-height: 130px;
+}
+
+.agenda {
+  position: absolute;
+    bottom: 20px;
+    left: 20px;
+    z-index: 1;
 }

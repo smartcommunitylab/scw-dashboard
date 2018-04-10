@@ -38,6 +38,7 @@
           </div>
         </div>
         <div class="col col-md-8 map-container">
+          <img class="agenda" [src]="'http://maps.dedagroup.it/geoserver/mobility/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER='+currentType">
             <aol-map [width]="'100%'" [height]="'100%'">
                 <aol-interaction-default></aol-interaction-default>
                 <aol-control-defaults></aol-control-defaults>
