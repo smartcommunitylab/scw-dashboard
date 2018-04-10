@@ -267,7 +267,8 @@ export class DbParticipationComponent implements OnInit {
         chartType: 'LineChart',
         dataTable: table,
         options: {legend: 'none', height: 130, chartArea: {left: '3.5%', top: '5%', width: '95%', height: '79%'},
-          hAxis: {textPosition: 'out', showTextEvery: 5}, colors: ['#0000ff', '#ff0000', '#ffe800']}
+        vAxis: {scaleType: 'log'},
+        hAxis: {textPosition: 'out', showTextEvery: 5}, colors: ['#0000ff', '#ff0000', '#ffe800']}
       };
     }
   }
@@ -293,6 +294,7 @@ export class DbParticipationComponent implements OnInit {
         chartType: 'ColumnChart',
         dataTable: table,
         options: {legend: 'none', height: 130, chartArea: {left: '6%', top: '5%', width: '100%', height: '79%'},
+          vAxis: {scaleType: 'log'},
           hAxis: {textPosition: 'out'}, colors: ['#0000ff', '#ff0000', '#ffe800']}
       };
     }
