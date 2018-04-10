@@ -84,3 +84,7 @@ nouislider, .noUi-vertical {
     left: 20px;
     z-index: 1;
 }
+
+.card-selected {
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+}

@@ -30,7 +30,8 @@ export class DbTripsComponent implements OnInit {
     LAYERS: this.layers['total']
   }; // layers
 
-  currentType = this.layers['total']; // TODO set when bike/walk/PT/total are clicked in the day charts, filters the trips shown on the map
+  currentType = 'total'; //Walk, Bike, PT or total
+  currentLayer = this.layers['total'];
   monthChart: any;
   weekChart: any;
   dayChartWalk: any;
@@ -105,12 +106,14 @@ export class DbTripsComponent implements OnInit {
     const old = this.wmsParams;
     this.wmsParams = null;
     setTimeout(() => {
-      if (this.currentType === this.layers[type]) {
+      if (this.currentLayer === this.layers[type]) {
         old.LAYERS = this.layers['total'];
-        this.currentType = this.layers['total'];
+        this.currentLayer = this.layers['total'];
+        this.currentType = 'total';
       } else {
         old.LAYERS = this.layers[type];
-        this.currentType = this.layers[type];
+        this.currentLayer = this.layers[type];
+        this.currentType = type;
       }
       this.wmsParams = old;
     });
