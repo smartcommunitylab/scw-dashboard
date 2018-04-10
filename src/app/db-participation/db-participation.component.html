@@ -36,7 +36,7 @@
                 <aol-interaction-default></aol-interaction-default>
                 <aol-control-defaults></aol-control-defaults>
                 <aol-view [zoom]="10">
-                    <aol-coordinate [x]="11.123251" [y]="46.044685" [srid]="'EPSG:4326'"></aol-coordinate>
+                    <aol-coordinate [x]="11.123251" [y]="45.944685" [srid]="'EPSG:4326'"></aol-coordinate>
                 </aol-view>
                 <aol-layer-tile>
                     <aol-source-osm></aol-source-osm>
@@ -49,10 +49,9 @@
                     >
                     </aol-coordinate>
                     <aol-content>
-                        <div (click)="citySelected(city)" [class]="'station '+(city.name == currentCity? 'selected ':'')+ (dayAggData[city.name]? dayAggData[city.name].style : '')" >
-                          AAA
-                          <div *ngIf="dayAggData[city.name]">
-                            <span *ngIf="dayAggData[city.name].Registrati"><b>REGISTRATI</b>: {{dayAggData[city.name].Registrati | number}}<br/></span>
+                        <div (click)="citySelected(city)" [class]="'station '+(city.name == currentCity? 'selected ':'')+ (dayAggData[city.name]? dayAggData[city.name].style : 'level1')" >
+                          <div *ngIf="dayAggData[city.name] && city.name == currentCity">
+                            <span *ngIf="dayAggData[city.name].Registrati"><b>REG.</b>: {{dayAggData[city.name].Registrati | number}}<br/></span>
                             <span *ngIf="dayAggData[city.name].Attivi"><b>ATTIVI</b>: {{dayAggData[city.name].Attivi | number}}<br/></span>
                             <span *ngIf="dayAggData[city.name].Azioni"><b>AZIONI</b>: {{dayAggData[city.name].Azioni | number}}</span>
                           </div>

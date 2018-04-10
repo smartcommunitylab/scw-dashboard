@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
-import { forkJoin } from "rxjs/observable/forkJoin";
+import { forkJoin } from 'rxjs/observable/forkJoin';
 
 import * as moment from 'moment';
 import { TimeFormatter } from '../db-aria/db-aria.component';
@@ -17,7 +17,7 @@ const MIN_DATE = moment('2017-09-10').toDate().getTime();
 })
 export class DbParticipationComponent implements OnInit {
 
-  currentCity = 'Trento'; //Trento/Rovereto
+  currentCity = 'Trento'; // Trento/Rovereto
   monthChart: any;
   weekChart: any;
   dayChartRegistrati: any;
@@ -25,13 +25,13 @@ export class DbParticipationComponent implements OnInit {
   dayChartAzioni: any;
   playing = false;
 
-  dayAggData = {} //{"Trento": {"Attivi": 31, "Registrati": 32, "Azioni": 33}. "Rovereto": {...}}
-  dayHistData = {}
+  dayAggData = {}; // {'Trento': {'Attivi': 31, 'Registrati': 32, 'Azioni': 33}. 'Rovereto': {...}}
+  dayHistData = {};
   monthData = [];
 
   cities = [
-    { "name": "Trento", "X": "46.0805591", "Y": "11.0503148"},
-    { "name": "Rovereto", "X": "45.8833074", "Y": "10.9664293"}
+    { 'name': 'Trento', 'Y': 46.0805591, 'X': 11.0503148},
+    { 'name': 'Rovereto', 'Y': 45.8833074, 'X': 10.9664293}
   ];
 
   /*****
@@ -59,7 +59,7 @@ export class DbParticipationComponent implements OnInit {
     if (this.playing) {
       this.playPause();
     }
-    let newCurrentTime = moment(MIN_DATE).add(value, 'days').toDate().getTime();
+    const newCurrentTime = moment(MIN_DATE).add(value, 'days').toDate().getTime();
     this.updateData(newCurrentTime);
   }
   playPause() {
@@ -94,7 +94,7 @@ export class DbParticipationComponent implements OnInit {
 
   /**
    * Called when a city on the map is clicked, causes data update for the charts
-   * @param city 
+   * @param city
    */
   citySelected(city: any) {
     console.log('clicked', city);
@@ -108,7 +108,10 @@ export class DbParticipationComponent implements OnInit {
   }
 
   private updateData(event?: number) {
-    if (event) { this.currentTime = event; }
+    if (event) {
+      this.currentTime = event;
+      this.currentSliderVal = moment(this.currentTime).diff(moment(MIN_DATE), 'days');
+    }
     this.currentTimeFormatted = moment(this.currentTime).subtract(1, 'days').locale('it').format('DD MMM YYYY');
     const now = moment(this.currentTime);
     const month = moment(now).subtract(30, 'days').format('YYYY-MM-DD HH:mm');
@@ -116,16 +119,16 @@ export class DbParticipationComponent implements OnInit {
     const to = now.format('YYYY-MM-DD HH:mm');
 
     // tslint:disable-next-line:max-line-length
-    this.getDayAgg('Registrati', this.currentTime, this.currentCity); //number of users who registered in the last day
-    this.getDayAgg('Attivi', this.currentTime, this.currentCity); //number of active users in the last day
-    this.getDayAgg('Azioni', this.currentTime, this.currentCity); //number of actions in the last day
-    this.getDayHist('Registrati', moment(day).toDate().getTime(), this.currentTime, this.currentCity); //users registered throughout the last day
+    this.getDayAgg('Registrati', this.currentTime, this.currentCity); // number of users who registered in the last day
+    this.getDayAgg('Attivi', this.currentTime, this.currentCity); // number of active users in the last day
+    this.getDayAgg('Azioni', this.currentTime, this.currentCity); // number of actions in the last day
+    this.getDayHist('Registrati', moment(day).toDate().getTime(), this.currentTime, this.currentCity); // users registered throughout the last day
     this.getDayHist('Attivi', moment(day).toDate().getTime(), this.currentTime, this.currentCity);
     this.getDayHist('Azioni', moment(day).toDate().getTime(), this.currentTime, this.currentCity);
     this.getMonthHist(this.currentCity, moment(month).toDate().getTime(), this.currentTime);
   }
 
-  //needed?
+  // needed?
   private updateStations() {
     const start = moment(this.currentTime).format('YYYY-MM-DD');
     const day = this.monthData.filter((e) => e.resdate >= start);
@@ -146,20 +149,20 @@ export class DbParticipationComponent implements OnInit {
         if (!this.dayAggData[residence]) { this.dayAggData[residence] = {}; }
         this.dayAggData[residence][type] = res.aggregations.unique_players.value;
         Object.keys(this.dayAggData).forEach((key) => {
-          //this.dayAggData[key].part_index = this.computePartIndex();
-          this.dayAggData[key].style = 'level1';// + this.dayAggData[key].part_index;
+          // this.dayAggData[key].part_index = this.computePartIndex();
+          this.dayAggData[key].style = 'level1'; // + this.dayAggData[key].part_index;
         });
       });
     } else {
       // tslint:disable-next-line:max-line-length
-      daySumQuery = { query: { bool: { must: [{ match: { eventType: (type == 'Registrati' ? 'UserCreation' : 'Action') } }, { match: { residence: residence } }, { range: { executionTime: { from: from, to: date } } }] } } };
-      
+      daySumQuery = { query: { bool: { must: [{ match: { eventType: (type === 'Registrati' ? 'UserCreation' : 'Action') } }, { match: { residence: residence } }, { range: { executionTime: { from: from, to: date } } }] } } };
+
       this.http.post(API + '_count', daySumQuery).subscribe((res: any) => {
         if (!this.dayAggData[residence]) { this.dayAggData[residence] = {}; }
         this.dayAggData[residence][type] = res.count;
         Object.keys(this.dayAggData).forEach((key) => {
-          //this.dayAggData[key].part_index = this.computePartIndex(); //TODO
-          this.dayAggData[key].style = 'level1';// + this.dayAggData[key].part_index; //da level1 a level5
+          // this.dayAggData[key].part_index = this.computePartIndex(); //TODO
+          this.dayAggData[key].style = 'level1'; // + this.dayAggData[key].part_index; //da level1 a level5
         });
       });
     }
@@ -170,39 +173,39 @@ export class DbParticipationComponent implements OnInit {
     switch (type) {
       case 'Registrati': {
         // tslint:disable-next-line:max-line-length
-        daySumQuery = {size: 0, query: {bool: {must: [{match: {eventType : 'UserCreation'}},{match: {residence : residence}},{range: {executionTime : {from: from, to : to}}}]}},
+        daySumQuery = {size: 0, query: {bool: {must: [{match: {eventType : 'UserCreation'}}, {match: {residence : residence}}, {range: {executionTime : {from: from, to : to}}}]}},
         aggs : {by_date: {date_histogram: {field : 'executionTime', interval : 'hour'}, aggs: {operations: {value_count: {field : 'playerId'}}, cumulative_operations: {cumulative_sum: {buckets_path : 'operations'}}}}}};
-        
+
         this.http.post(API + '_search', daySumQuery).subscribe((res: any) => {
           if (!this.dayHistData[type]) { this.dayHistData[type] = {}; }
-          this.dayHistData[type] = res.aggregations.by_date.buckets; //dayHistData = {"Registrati": [{"key": 1234567890000, "unique_players": {"value": 3}}]}
-          //update day charts
+          this.dayHistData[type] = res.aggregations.by_date.buckets; // dayHistData = {'Registrati': [{'key': 1234567890000, 'unique_players': {'value': 3}}]}
+          // update day charts
           this.dayChartRegistrati = this.updateChart(this.dayChartRegistrati, 'Registrati');
         });
         break;
       }
       case 'Attivi': {
         // tslint:disable-next-line:max-line-length
-        daySumQuery = {size: 0, query: {bool: {must: [{match: {eventType : 'Action'}},{match: {residence : residence}},{range: {executionTime : {from: from, to : to}}}]}},
+        daySumQuery = {size: 0, query: {bool: {must: [{match: {eventType : 'Action'}}, {match: {residence : residence}}, {range: {executionTime : {from: from, to : to}}}]}},
         aggs : {by_date: {date_histogram: {field : 'executionTime', interval : 'hour'}, aggs: {operations: {value_count: {field : 'playerId'}}, cumulative_operations: {cumulative_sum: {buckets_path : 'operations'}}}}}};
-        
+
         this.http.post(API + '_search', daySumQuery).subscribe((res: any) => {
           if (!this.dayHistData[type]) { this.dayHistData[type] = {}; }
-          this.dayHistData[type] = res.aggregations.by_date.buckets; //dayHistData = {"Registrati": [{"key": 1234567890000, "unique_players": {"value": 3}}]}
-          //update day charts
+          this.dayHistData[type] = res.aggregations.by_date.buckets; // dayHistData = {'Registrati': [{'key': 1234567890000, 'unique_players': {'value': 3}}]}
+          // update day charts
           this.dayChartAttivi = this.updateChart(this.dayChartAttivi, 'Attivi');
         });
         break;
       }
       case 'Azioni': {
         // tslint:disable-next-line:max-line-length
-        daySumQuery = {size: 0, query: {bool: {must: [{match: {eventType : 'Action'}},{match: {residence : residence}},{range: {executionTime : {from: from, to : to}}}]}},
+        daySumQuery = {size: 0, query: {bool: {must: [{match: {eventType : 'Action'}}, {match: {residence : residence}}, {range: {executionTime : {from: from, to : to}}}]}},
         aggs : {by_date: {date_histogram: {field : 'executionTime', interval : 'hour'}, aggs: {operations: {cardinality: {field : 'playerId'}}, cumulative_operations: {cumulative_sum: {buckets_path : 'operations'}}}}}};
-        
+
         this.http.post(API + '_search', daySumQuery).subscribe((res: any) => {
           if (!this.dayHistData[type]) { this.dayHistData[type] = {}; }
-          this.dayHistData[type] = res.aggregations.by_date.buckets; //dayHistData = {"Registrati": [{"key": 1234567890000, "unique_players": {"value": 3}}]}
-          //update day charts
+          this.dayHistData[type] = res.aggregations.by_date.buckets; // dayHistData = {'Registrati': [{'key': 1234567890000, 'unique_players': {'value': 3}}]}
+          // update day charts
           this.dayChartAzioni = this.updateChart(this.dayChartAzioni, 'Azioni');
         });
         break;
@@ -211,21 +214,21 @@ export class DbParticipationComponent implements OnInit {
   }
 
   private getMonthHist(residence: string, from: number, to: number) {
-    let monthData = {};
-    let newMonthData = [];
+    const monthData = {};
+    const newMonthData = [];
     // tslint:disable-next-line:max-line-length
-    let regQuery = {size: 0, query: {bool: {must: [{match: {eventType : 'UserCreation'}},{match: {residence : residence}},{range: {executionTime : {from: from, to : to}}}]}},
+    const regQuery = {size: 0, query: {bool: {must: [{match: {eventType : 'UserCreation'}}, {match: {residence : residence}}, {range: {executionTime : {from: from, to : to}}}]}},
     aggs : {by_date: {date_histogram: {field : 'executionTime', interval : 'day'}, aggs: {operations: {value_count: {field : 'playerId'}}, cumulative_operations: {cumulative_sum: {buckets_path : 'operations'}}}}}};
     // tslint:disable-next-line:max-line-length
-    let attQuery = {size: 0, query: {bool: {must: [{match: {eventType : 'Action'}},{match: {residence : residence}},{range: {executionTime : {from: from, to : to}}}]}},
+    const attQuery = {size: 0, query: {bool: {must: [{match: {eventType : 'Action'}}, {match: {residence : residence}}, {range: {executionTime : {from: from, to : to}}}]}},
     aggs : {by_date: {date_histogram: {field : 'executionTime', interval : 'day'}, aggs: {operations: {cardinality: {field : 'playerId'}}, cumulative_operations: {cumulative_sum: {buckets_path : 'operations'}}}}}};
     // tslint:disable-next-line:max-line-length
-    let azQuery = {size: 0, query: {bool: {must: [{match: {eventType : 'Action'}},{match: {residence : residence}},{range: {executionTime : {from: from, to : to}}}]}},
+    const azQuery = {size: 0, query: {bool: {must: [{match: {eventType : 'Action'}}, {match: {residence : residence}}, {range: {executionTime : {from: from, to : to}}}]}},
     aggs : {by_date: {date_histogram: {field : 'executionTime', interval : 'day'}, aggs: {operations: {value_count: {field : 'playerId'}}, cumulative_operations: {cumulative_sum: {buckets_path : 'operations'}}}}}};
 
-    let monthDataRegistrati = this.http.post(API + '_search', regQuery);
-    let monthDataAttivi = this.http.post(API + '_search', attQuery);
-    let monthDataAzioni = this.http.post(API + '_search', azQuery);
+    const monthDataRegistrati = this.http.post(API + '_search', regQuery);
+    const monthDataAttivi = this.http.post(API + '_search', attQuery);
+    const monthDataAzioni = this.http.post(API + '_search', azQuery);
 
     forkJoin([monthDataRegistrati, monthDataAttivi, monthDataAzioni]).subscribe(results => {
       TYPES.forEach((t) => {
@@ -242,7 +245,7 @@ export class DbParticipationComponent implements OnInit {
       this.updateWeekChart();
     });
   }
-  
+
   /*****
    * FUNCTIONS THAT UPDATE CHARTS
    *****/
@@ -273,14 +276,14 @@ export class DbParticipationComponent implements OnInit {
     const table = [['Day', 'Registrati', 'Attivi', 'Azioni']];
     const map = {};
     const start = moment(this.currentTime).subtract(7, 'days').format('YYYY-MM-DD');
-    
+
     const week = this.monthData.filter((e) => e.resdate >= start);
     week.forEach((e) => {
       if (!map[e.resdate]) {map[e.resdate] = [0, 0, 0]; }
       const idx = TYPES.indexOf(e.name);
       if (idx >= 0) {map[e.resdate][idx] = e.val; }
     });
-    
+
     Object.keys(map).forEach((d) => table.push([moment(d).locale('it').format('ddd DD')].concat(map[d])));
     if (this.weekChart) {
       this.weekChart = Object.create(this.weekChart);
@@ -296,16 +299,16 @@ export class DbParticipationComponent implements OnInit {
   }
 
   private updateChart(chart: any, attr: string) {
-    let colors = {'Registrati': '#0000ff', 'Attivi': '#ff0000', 'Azioni': '#ffe800'};
-    let dayData = [];
+    const colors = {'Registrati': '#0000ff', 'Attivi': '#ff0000', 'Azioni': '#ffe800'};
+    const dayData = [];
     this.dayHistData[attr].forEach((e) => {
-      dayData.push({ "value": String(e.operations.value), "name": attr, "resulttime": moment(e.key).toDate().toISOString() });
+      dayData.push({ 'value': String(e.operations.value), 'name': attr, 'resulttime': moment(e.key).toDate().toISOString() });
     });
 
     let table = [['Day', attr]];
     const day = dayData.filter((e) => e.name === attr).map((e) => [e.resulttime, parseFloat(e.value)]);
     day.forEach((e) => {
-      let formattedTime = moment(e[0]).locale('it').format('HH:mm');//ddd DD HH:mm
+      const formattedTime = moment(e[0]).locale('it').format('HH:mm'); // ddd DD HH:mm
       e[0] = formattedTime;
     });
     table = table.concat(day);
