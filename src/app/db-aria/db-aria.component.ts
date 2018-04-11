@@ -115,7 +115,6 @@ export class DbAriaComponent implements OnInit {
       this.currentTime = event;
       this.currentSliderVal = moment(this.currentTime).diff(moment(MIN_DATE), 'days');
     }
-    this.currentTimeFormatted = moment(this.currentTime).subtract(1, 'days').locale('it').format('DD MMM YYYY');
     const now = moment(this.currentTime);
     if (now.isDST()) { now.subtract(2, 'hours'); } else { now.subtract(1, 'hours'); }
     const month = moment(now).subtract(30, 'days').format('YYYY-MM-DD HH:mm');
@@ -125,31 +124,37 @@ export class DbAriaComponent implements OnInit {
     this.http.get(`${API}/PeriodData/${this.currentStation}?fromTime=${month}&toTime=${to}`)
     .subscribe((data) => {
       this.monthData = (data as any).Result.Element;
-      this.updateMonthChart();
-      this.updateWeekChart();
-      this.updateStations();
+      if (this.monthData && typeof this.monthData !== undefined){
+        this.updateMonthChart();
+        this.updateWeekChart();
+        this.updateStations();
+      }
     });
     // last day for current station (day view)
     this.http.get(`${API}/Day/${this.currentStation}?fromTime=${day}&toTime=${to}`)
     .subscribe((data) => {
       this.dayData = (data as any).Entries.Entry;
-      this.dayChartPM10 = this.updateChart(this.dayChartPM10, 'PM10');
-      this.dayChartPM25 = this.updateChart(this.dayChartPM25, 'PM2.5');
-      this.dayChartSO2 = this.updateChart(this.dayChartSO2, 'SO2');
+      if (this.dayData && typeof this.dayData !== undefined) {
+        this.dayChartPM10 = this.updateChart(this.dayChartPM10, 'PM10');
+        this.dayChartPM25 = this.updateChart(this.dayChartPM25, 'PM2.5');
+        this.dayChartSO2 = this.updateChart(this.dayChartSO2, 'SO2');
+      }
     });
     // aggregate data for last day
     this.http.get(`${API}/AggData?fromTime=${day}&toTime=${to}`)
     .subscribe((data) => {
       const stationData = (data as any).Entries.Entry;
       // in service result the station ID is represented as resulttime
-      stationData.forEach((sd) => {
-        if (!this.stationData[sd.resulttime]) { this.stationData[sd.resulttime] = {}; }
-        this.stationData[sd.resulttime][sd.name] = sd.value;
-      });
-      Object.keys(this.stationData).forEach((key) => {
-        this.stationData[key].caqi = this.computeCaqi(this.stationData[key]);
-        this.stationData[key].style = 'level' + this.stationData[key].caqi;
-      });
+      if (stationData && typeof stationData !== undefined) {
+        stationData.forEach((sd) => {
+          if (!this.stationData[sd.resulttime]) { this.stationData[sd.resulttime] = {}; }
+          this.stationData[sd.resulttime][sd.name] = sd.value;
+        });
+        Object.keys(this.stationData).forEach((key) => {
+          this.stationData[key].caqi = this.computeCaqi(this.stationData[key]);
+          this.stationData[key].style = 'level' + this.stationData[key].caqi;
+        });
+      }
     });
   }
 
@@ -172,7 +177,6 @@ export class DbAriaComponent implements OnInit {
   }
 
   private updateMonthChart() {
-    // NOTE: log scale can only be used for continuous axis, i.e. not with string values; idea: convert string to date, use ticks to choose text to display
     const table = [['Day', 'PM10', 'PM2.5', 'SO2']];
     const map = {};
     this.monthData.forEach((e) => {
@@ -200,36 +204,41 @@ export class DbAriaComponent implements OnInit {
     const start = moment(this.currentTime).subtract(7, 'days').format('YYYY-MM-DD');
 
     const week = this.monthData.filter((e) => e.resdate >= start);
-    week.forEach((e) => {
-      if (!map[e.resdate]) {map[e.resdate] = [0, 0, 0]; }
-      const idx = TYPES.indexOf(e.name);
-      if (idx >= 0) {map[e.resdate][idx] = e.val; }
-    });
+    if (week.length > 0) {
+      week.forEach((e) => {
+        if (!map[e.resdate]) { map[e.resdate] = [0, 0, 0]; }
+        const idx = TYPES.indexOf(e.name);
+        if (idx >= 0) { map[e.resdate][idx] = e.val; }
+      });
 
-    Object.keys(map).forEach((d) => table.push([moment(d, 'YYYY-MM-DDZ').locale('it').format('ddd DD')].concat(map[d])));
-    if (this.weekChart) {
-      this.weekChart = Object.create(this.weekChart);
-      this.weekChart.dataTable = table;
-    } else {
-      this.weekChart = {
-        chartType: 'ColumnChart',
-        dataTable: table,
-        options: {legend: 'none', height: 130, chartArea: {left: '6%', top: '5%', width: '100%', height: '79%'},
-          hAxis: {textPosition: 'out'}, colors: ['#0000ff', '#ff0000', '#ff00ee']}
-      };
+      Object.keys(map).forEach((d) => table.push([moment(d, 'YYYY-MM-DDZ').locale('it').format('ddd DD')].concat(map[d])));
+      if (this.weekChart) {
+        this.weekChart = Object.create(this.weekChart);
+        this.weekChart.dataTable = table;
+      } else {
+        this.weekChart = {
+          chartType: 'ColumnChart',
+          dataTable: table,
+          options: {
+            legend: 'none', height: 130, chartArea: { left: '6%', top: '5%', width: '100%', height: '79%' },
+            hAxis: { textPosition: 'out' }, colors: ['#0000ff', '#ff0000', '#ff00ee']
+          }
+        };
+      }
     }
   }
 
   private updateChart(chart: any, attr: string) {
+    this.currentTimeFormatted = moment(this.currentTime).subtract(1, 'days').locale('it').format('DD MMM YYYY');
     const colors = {'PM10': '#0000ff', 'PM2.5': '#ff0000', 'SO2': '#ff00ee'};
     let table = [['Day', attr]];
+    let newChart = null;
     const day = this.dayData.filter((e) => e.name === attr).map((e) => [e.resulttime, parseFloat(e.value)]);
     day.forEach((e) => {
-      const formattedTime = moment(e[0]).locale('it').format('HH:mm'); // ddd DD HH:mm
+      const formattedTime = moment(e[0]).locale('it').format('HH:mm');
       e[0] = formattedTime;
     });
     table = table.concat(day);
-    let newChart = null;
     if (table.length <= 1) {
       return newChart;
     }

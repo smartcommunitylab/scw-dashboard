@@ -7,7 +7,7 @@
             <h4 class="card-title">Andamento orario {{currentTimeFormatted}}</h4>
           </div>
           <div class="element">
-            <div class="card border-secondary mb-3" (click)="cardSelected('Walk')" [class.card-selected]="currentType=='Walk'">
+            <div class="card mb-3" (click)="cardSelected('Walk')" [class.border-secondary]="currentType=='total'" [class.border-danger]="currentType=='Walk'">
               <div class="card-body">
                 <h4 class="card-title">WALK
                     <span *ngIf="dayAggData['Walk']">: {{dayAggData['Walk'].value}}</span>
@@ -17,7 +17,7 @@
             </div>
           </div>
           <div class="element">
-            <div class="card border-secondary mb-3" (click)="cardSelected('Bike')" [class.card-selected]="currentType=='Bike'">
+            <div class="card mb-3" (click)="cardSelected('Bike')" [class.border-secondary]="currentType=='total'" [class.border-danger]="currentType=='Bike'">
               <div class="card-body">
                 <h4 class="card-title">BIKE
                   <span *ngIf="dayAggData['Bike']">: {{dayAggData['Bike'].value}}</span>
@@ -27,7 +27,7 @@
             </div>
           </div>
           <div class="element">
-            <div class="card border-secondary mb-3" (click)="cardSelected('PT')" [class.card-selected]="currentType=='PT'">
+            <div class="card mb-3" (click)="cardSelected('PT')" [class.border-secondary]="currentType=='total'" [class.border-danger]="currentType=='PT'">
               <div class="card-body">
                 <h4 class="card-title">TP
                     <span *ngIf="dayAggData['PT']">: {{dayAggData['PT'].value}}</span>

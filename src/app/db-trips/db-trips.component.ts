@@ -124,7 +124,6 @@ export class DbTripsComponent implements OnInit {
       this.currentTime = event;
       this.currentSliderVal = moment(this.currentTime).diff(moment(MIN_DATE), 'days');
     }
-    this.currentTimeFormatted = moment(this.currentTime).subtract(1, 'days').locale('it').format('DD MMM YYYY');
     const now = moment(this.currentTime);
     const month = moment(now).subtract(30, 'days').format('YYYY-MM-DD HH:mm');
     const day = moment(now).subtract(1, 'days').format('YYYY-MM-DD HH:mm');
@@ -245,6 +244,9 @@ export class DbTripsComponent implements OnInit {
       if (idx >= 0) {map[e.resdate][idx] = e.val; }
     });
     Object.keys(map).forEach((d) => table.push([moment(d).locale('it').format('DD MMM')].concat(map[d])));
+    if (table[1][0].split(' ')[1] === table[table.length-1][0].split(' ')[1] && table[1][0].split(' ')[0] > table[table.length-1][0].split(' ')[0]) {
+      table.pop();
+    }
     if (this.monthChart) {
       this.monthChart = Object.create(this.monthChart);
       this.monthChart.dataTable = table;
@@ -264,34 +266,38 @@ export class DbTripsComponent implements OnInit {
     const start = moment(this.currentTime).subtract(7, 'days').format('YYYY-MM-DD');
 
     const week = this.monthData.filter((e) => e.resdate >= start);
-    week.forEach((e) => {
-      if (!map[e.resdate]) {map[e.resdate] = [0, 0, 0]; }
-      const idx = TYPES.indexOf(e.name);
-      if (idx >= 0) {map[e.resdate][idx] = e.val; }
-    });
+    if (week.length > 0) {
+      week.forEach((e) => {
+        if (!map[e.resdate]) { map[e.resdate] = [0, 0, 0]; }
+        const idx = TYPES.indexOf(e.name);
+        if (idx >= 0) { map[e.resdate][idx] = e.val; }
+      });
 
-    Object.keys(map).forEach((d) => table.push([moment(d).locale('it').format('ddd DD')].concat(map[d])));
-    if (this.weekChart) {
-      this.weekChart = Object.create(this.weekChart);
-      this.weekChart.dataTable = table;
-    } else {
-      this.weekChart = {
-        chartType: 'ColumnChart',
-        dataTable: table,
-        options: {legend: 'none', height: 130, chartArea: {left: '6%', top: '5%', width: '100%', height: '79%'},
-          hAxis: {textPosition: 'out'}, colors: ['#0000ff', '#ff0000', '#ff00ee']}
-      };
+      Object.keys(map).forEach((d) => table.push([moment(d).locale('it').format('ddd DD')].concat(map[d])));
+      if (this.weekChart) {
+        this.weekChart = Object.create(this.weekChart);
+        this.weekChart.dataTable = table;
+      } else {
+        this.weekChart = {
+          chartType: 'ColumnChart',
+          dataTable: table,
+          options: {
+            legend: 'none', height: 130, chartArea: { left: '6%', top: '5%', width: '100%', height: '79%' },
+            hAxis: { textPosition: 'out' }, colors: ['#0000ff', '#ff0000', '#ff00ee']
+          }
+        };
+      }
     }
   }
 
   private updateChart(chart: any, attr: string) {
+    this.currentTimeFormatted = moment(this.currentTime).subtract(1, 'days').locale('it').format('DD MMM YYYY');
     const colors = {'Walk': '#0000ff', 'Bike': '#ff0000', 'PT': '#ff00ee'};
     const dayData = [];
     const filteredData = this.dayHistData[attr]['hour']; // [{"key_as_string":"1517803200000","key":1517803200000,"doc_count":2,"trips":{"value":2.0},"cumulative_trips":{"value":2.0}}, ...]
     filteredData.forEach((e) => {
       dayData.push({ 'value': String(e.trips.value), 'name': attr, 'resulttime': moment(e.key).toDate().toISOString() });
     });
-
     let table = [['Day', attr]];
     const day = dayData.filter((e) => e.name === attr).map((e) => [e.resulttime, parseFloat(e.value)]);
     day.forEach((e) => {
