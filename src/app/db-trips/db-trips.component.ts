@@ -81,7 +81,7 @@ export class DbTripsComponent implements OnInit {
       this.timer = setInterval(() => {
         if (!moment(this.currentTime).isBefore(moment(), 'day')) { this.currentTime = MIN_DATE; }
         this.updateData(moment(this.currentTime).add(1, 'days').toDate().getTime());
-      }, 1000);
+      }, 3000);
     }
   }
   /*****
